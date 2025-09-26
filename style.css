@@ -50,6 +50,47 @@ body {
     color: #3498db;
 }
 
+/* Dropdown styles (generic for Projects and Personal) */
+.projects-dropdown,
+.personal-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.projects-dropdown .dropdown-toggle,
+.personal-dropdown .dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 220px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    padding: 0.5rem 0;
+    list-style: none;
+    z-index: 1500;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #2c3e50;
+    text-decoration: none;
+}
+
+.dropdown-menu li a:hover {
+    background-color: #f6f8fa;
+    color: #3498db;
+}
+
+.projects-dropdown.open .dropdown-menu,
+.personal-dropdown.open .dropdown-menu {
+    display: block;
+}
+
 /* Main Content Styles */
 main {
     padding-top: 80px; /* Account for fixed navbar */
