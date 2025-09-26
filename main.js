@@ -36,8 +36,25 @@ function initUI() {
             console.debug('dropdown toggle clicked for', container.className);
             e.preventDefault();
             // close other dropdowns
-            dropdownContainers.forEach(c => { if (c !== container) c.classList.remove('open'); });
+            dropdownContainers.forEach(c => { if (c !== container) c.classList.remove('open');
+                const otherMenu = c.querySelector('.dropdown-menu');
+                if (otherMenu) otherMenu.style.display = '';
+            });
             container.classList.toggle('open');
+
+            // Force show/hide to work around any CSS specificity/clipping issues
+            const menu = container.querySelector('.dropdown-menu');
+            if (menu) {
+                if (container.classList.contains('open')) {
+                    menu.style.display = 'block';
+                    menu.style.left = '0';
+                    menu.style.right = 'auto';
+                    const rect = menu.getBoundingClientRect();
+                    console.debug('dropdown menu shown, rect=', rect);
+                } else {
+                    menu.style.display = 'none';
+                }
+            }
         });
     });
 
