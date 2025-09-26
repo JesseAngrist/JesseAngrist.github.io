@@ -1,13 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize UI behaviors after nav is present. Some pages inject nav.html at runtime.
+function initUI() {
+    console.debug('initUI called');
     // Get all navigation links and sections
     const navLinks = document.querySelectorAll('.nav-links a');
     const sections = document.querySelectorAll('.section');
+    console.debug('navLinks found:', navLinks.length, 'sections found:', sections.length);
     // Support multiple dropdown containers (projects, personal, etc.)
     const dropdownContainers = document.querySelectorAll('.projects-dropdown, .personal-dropdown');
+    console.debug('dropdownContainers found:', dropdownContainers.length);
 
     // Handle section navigation (internal links)
     navLinks.forEach(link => {
-        // If link goes to an external project page (ends with .html), let it navigate normally
+        // If link goes to an internal anchor, handle via JS
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
             if (href && href.startsWith('#')) {
@@ -29,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const toggle = container.querySelector('.dropdown-toggle');
         if (!toggle) return;
         toggle.addEventListener('click', (e) => {
+            console.debug('dropdown toggle clicked for', container.className);
             e.preventDefault();
             // close other dropdowns
             dropdownContainers.forEach(c => { if (c !== container) c.classList.remove('open'); });
@@ -44,8 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdownContainers.forEach(c => c.classList.remove('open'));
         }
     });
-    
-    // Highlight active link on project pages
+
     // Highlight active link on project/personal pages. Support nested paths like 'projects/project1.html'
     const currentPath = window.location.pathname.split('/').slice(-2).join('/'); // e.g., 'projects/project1.html' or 'project1.html'
     if (currentPath) {
@@ -58,4 +62,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+}
+
+// If nav already exists, init immediately; otherwise wait for inject-nav to signal
+if (document.querySelector('.nav-links')) {
+    document.addEventListener('DOMContentLoaded', initUI);
+} else {
+    // Wait for nav to be injected
+    document.addEventListener('nav-injected', () => {
+        initUI();
+    });
+    // As a fallback, init once DOMContentLoaded fires too
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => { if (document.querySelector('.nav-links')) initUI(); }, 120);
+    });
+}

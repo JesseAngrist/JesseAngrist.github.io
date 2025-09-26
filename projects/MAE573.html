@@ -7,21 +7,7 @@
     <title>Project Two - Jesse Angrist</title>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">Jesse Angrist</div>
-        <ul class="nav-links">
-            <li><a href="../index.html">Home</a></li>
-            <li class="projects-dropdown">
-                <a href="../index.html#projects" class="dropdown-toggle">Projects ▾</a>
-                <ul class="dropdown-menu">
-                    <li><a href="project1.html">Project One</a></li>
-                    <li><a href="project2.html" class="active">Project Two</a></li>
-                    <li><a href="project3.html">Project Three</a></li>
-                </ul>
-            </li>
-            <li><a href="../index.html#personal">Personal</a></li>
-        </ul>
-    </nav>
+    <div id="site-nav"></div>
 
     <main>
         <section class="section active">
@@ -38,6 +24,7 @@
         </section>
     </main>
 
+    <script src="../inject-nav.js"></script>
     <script src="../main.js"></script>
 </body>
 </html>
