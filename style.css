@@ -39,8 +39,17 @@ body {
 .nav-brand {
     font-size: 1.4rem;
     font-weight: 700;
-    color: var(--accent-4);
     float: left;
+}
+
+.nav-brand a {
+    color: var(--accent-5);
+    text-decoration: none;
+    transition: color 0.18s ease;
+}
+
+.nav-brand a:hover {
+    color: var(--accent-3);
 }
 
 .nav-links {
@@ -141,7 +150,8 @@ h1, h2 {
 
 h1 {
     font-size: 2.25rem;
-    color: var(--accent-4);
+    color: var(--accent-3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 h2 {
@@ -154,26 +164,96 @@ h2 {
     margin: 0 auto;
 }
 
-/* Avatar (circular crop) */
+/* Home page specific styles */
+.home-content {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.home-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, 
+        rgba(38,139,210,0.03), 
+        rgba(42,161,152,0.02));
+    border-radius: 1rem;
+}
+
+.header-text {
+    text-align: left;
+    max-width: 500px;
+}
+
+.header-text h1 {
+    margin-bottom: 0.75rem;
+}
+
+.intro {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 0;
+}
+
+.bio {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--muted);
+}
+
+/* Avatar styles */
 .avatar {
-    width: 150px;
-    height: 150px;
+    width: 180px;
+    height: 180px;
     border-radius: 50%;
     overflow: hidden;
-    display: inline-block;
-    border: 3px solid rgba(255,255,255,0.06);
-    background: linear-gradient(135deg, rgba(38,139,210,0.08), rgba(42,161,152,0.04));
+    flex-shrink: 0;
+    border: 3px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, 
+        rgba(38,139,210,0.08), 
+        rgba(42,161,152,0.04));
 }
+
 .avatar img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* ensures rectangular image fills and crops */
+    object-fit: cover;
     object-position: center center;
     display: block;
 }
 
+/* Responsive design for home page */
 @media (max-width: 768px) {
-    .avatar { width: 120px; height: 120px; }
+    .home-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .header-text {
+        text-align: center;
+    }
+
+    .avatar {
+        width: 150px;
+        height: 150px;
+    }
+
+    .intro {
+        font-size: 1.1rem;
+    }
+
+    .bio {
+        font-size: 1rem;
+        padding: 0 1rem;
+    }
 }
 
 /* Responsive Design */

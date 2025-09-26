@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle section navigation (internal links)
     navLinks.forEach(link => {
-        // If link goes to an external project page (ends with .html), let it navigate normally
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
+            // Only prevent default for hash links
             if (href && href.startsWith('#')) {
                 e.preventDefault();
                 // Remove active class from all links and sections
@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.add('active');
                 const targetSection = document.querySelector(href);
                 if (targetSection) targetSection.classList.add('active');
+            }
+            // For dropdown toggles, always prevent default
+            if (link.classList.contains('dropdown-toggle')) {
+                e.preventDefault();
             }
         });
     });
