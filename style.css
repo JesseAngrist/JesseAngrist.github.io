@@ -4,27 +4,42 @@
     box-sizing: border-box;
 }
 
+:root{
+    /* Solarized-ish dark theme */
+    --bg:#002b36; /* base03 */
+    --surface:#073642; /* base02 */
+    --muted:#586e75; /* base0 */
+    --text:#93a1a1; /* base1 */
+    --accent-1:#b58900; /* yellow */
+    --accent-2:#859900; /* green */
+    --accent-3:#2aa198; /* cyan */
+    --accent-4:#268bd2; /* blue */
+    --accent-5:#d33682; /* magenta */
+    --card:#0b3b3c;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    color: #333;
+    color: var(--text);
+    background-color: var(--bg);
 }
 
 /* Navigation Styles */
 .navbar {
-    background-color: #ffffff;
+    background-color: var(--surface);
     padding: 1rem 2rem;
     position: fixed;
     width: 100%;
     top: 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
     z-index: 1000;
 }
 
 .nav-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #2c3e50;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-4);
     float: left;
 }
 
@@ -40,14 +55,21 @@ body {
 
 .nav-links a {
     text-decoration: none;
-    color: #2c3e50;
-    font-weight: 500;
-    transition: color 0.3s ease;
+    color: var(--text);
+    font-weight: 600;
+    transition: color 0.18s ease, background-color 0.18s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
 }
 
-.nav-links a:hover,
+.nav-links a:hover {
+    color: var(--accent-4);
+    background: rgba(38,139,210,0.06);
+}
+
 .nav-links a.active {
-    color: #3498db;
+    color: #fff;
+    background: linear-gradient(90deg, rgba(38,139,210,0.16), rgba(42,161,152,0.06));
 }
 
 /* Dropdown styles (generic for Projects and Personal) */
@@ -66,24 +88,28 @@ body {
     display: none;
     position: absolute;
     right: 0;
-    background-color: #ffffff;
-    min-width: 220px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    background-color: var(--card);
+    min-width: 260px; /* widened for longer titles */
+    max-width: 360px;
+    box-shadow: 0 12px 30px rgba(2,6,23,0.6);
     padding: 0.5rem 0;
     list-style: none;
     z-index: 1500;
+    border-radius: 8px;
 }
 
 .dropdown-menu li a {
     display: block;
-    padding: 0.5rem 1rem;
-    color: #2c3e50;
+    padding: 0.6rem 1rem;
+    color: var(--text);
     text-decoration: none;
+    line-height: 1.25;
+    white-space: normal; /* allow wrapping */
 }
 
 .dropdown-menu li a:hover {
-    background-color: #f6f8fa;
-    color: #3498db;
+    background-color: rgba(255,255,255,0.02);
+    color: var(--accent-4);
 }
 
 .projects-dropdown.open .dropdown-menu,
@@ -93,12 +119,14 @@ body {
 
 /* Main Content Styles */
 main {
-    padding-top: 80px; /* Account for fixed navbar */
+    padding-top: 88px; /* Account for fixed navbar */
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent 120px);
+    min-height: 100vh;
 }
 
 .section {
     min-height: 100vh;
-    padding: 4rem 2rem;
+    padding: 3.25rem 2rem;
     display: none;
 }
 
@@ -107,21 +135,45 @@ main {
 }
 
 h1, h2 {
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
+    color: #eee8d5; /* light text */
+    margin-bottom: 1.25rem;
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
+    color: var(--accent-4);
 }
 
 h2 {
-    font-size: 2rem;
+    font-size: 1.6rem;
+    color: var(--text);
 }
 
 .content {
     max-width: 800px;
     margin: 0 auto;
+}
+
+/* Avatar (circular crop) */
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+    border: 3px solid rgba(255,255,255,0.06);
+    background: linear-gradient(135deg, rgba(38,139,210,0.08), rgba(42,161,152,0.04));
+}
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ensures rectangular image fills and crops */
+    object-position: center center;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .avatar { width: 120px; height: 120px; }
 }
 
 /* Responsive Design */
