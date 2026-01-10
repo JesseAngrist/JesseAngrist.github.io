@@ -9,14 +9,15 @@ function getBasePath() {
 
 // Build navbar HTML from JSON data
 function buildNavbar(navData, basePath) {
-    let html = `<div class="nav-brand"><a href="${basePath}/">${navData.brand.text}</a></div>`;
+    const base = basePath.endsWith('/') ? basePath : basePath + '/';
+    let html = `<div class="nav-brand"><a href="${base}">${navData.brand.text}</a></div>`;
     html += '<ul class="nav-links">';
 
     for (const item of navData.items) {
         if (item.type === 'link') {
-            html += `<li><a href="${basePath}${item.href}">${item.label}</a></li>`;
+            html += `<li><a href="${base}${item.href}">${item.label}</a></li>`;
         } else if (item.type === 'dropdown') {
-            html += buildDropdown(item, basePath);
+            html += buildDropdown(item, base);
         }
     }
 
@@ -25,13 +26,13 @@ function buildNavbar(navData, basePath) {
 }
 
 // Build dropdown menu HTML
-function buildDropdown(dropdown, basePath) {
+function buildDropdown(dropdown, base) {
     let html = `<li class="${dropdown.id}">`;
     html += `<a href="#" class="dropdown-toggle">${dropdown.label} &#9662;</a>`;
     html += '<ul class="dropdown-menu">';
 
     for (const item of dropdown.items) {
-        html += `<li><a href="${basePath}${item.href}">${item.title}</a></li>`;
+        html += `<li><a href="${base}${item.href}">${item.title}</a></li>`;
     }
 
     html += '</ul></li>';
@@ -89,12 +90,13 @@ function setActiveLink() {
 
 // Fetch site data with caching
 async function getSiteData(basePath) {
+    const base = basePath.endsWith('/') ? basePath : basePath + '/';
     const cacheKey = 'siteData';
     const cached = sessionStorage.getItem(cacheKey);
 
     if (cached) {
         // Use cached data immediately, refresh in background
-        fetch(`${basePath}/data/site.json`)
+        fetch(`${base}data/site.json`)
             .then(r => r.json())
             .then(data => sessionStorage.setItem(cacheKey, JSON.stringify(data)))
             .catch(() => {});
@@ -102,7 +104,7 @@ async function getSiteData(basePath) {
     }
 
     // First load - fetch and cache
-    const response = await fetch(`${basePath}/data/site.json`);
+    const response = await fetch(`${base}data/site.json`);
     const data = await response.json();
     sessionStorage.setItem(cacheKey, JSON.stringify(data));
     return data;

@@ -1,8 +1,7 @@
 {
   "nav": {
     "brand": {
-      "text": "Jesse Angrist",
-      "href": "/"
+      "text": "Jesse Angrist"
     },
     "items": [
       {
@@ -12,22 +11,22 @@
         "items": [
           {
             "title": "Transcontinental Transmission and System Impacts",
-            "href": "/projects/MAE573.html"
+            "href": "projects/MAE573.html"
           },
           {
             "title": "Economics of Agrivoltaic Microgrids in Developing Nations",
-            "href": "/projects/SPI306.html"
+            "href": "projects/SPI306.html"
           },
           {
             "title": "Regulatory and Decarbonization Study of German Electricity System",
-            "href": "/projects/MAE422.html"
+            "href": "projects/MAE422.html"
           }
         ]
       },
       {
         "type": "link",
         "label": "Blog",
-        "href": "/blog.html"
+        "href": "blog.html"
       }
     ]
   },

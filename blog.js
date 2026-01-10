@@ -4,9 +4,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!container) return;
 
     const basePath = typeof getBasePath === 'function' ? getBasePath() : '.';
+    const base = basePath.endsWith('/') ? basePath : basePath + '/';
 
     try {
-        const response = await fetch(`${basePath}/data/site.json`);
+        const response = await fetch(`${base}data/site.json`);
         const data = await response.json();
 
         if (!data.blog || !data.blog.posts || data.blog.posts.length === 0) {
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const grouped = groupByMonth(posts);
 
         // Render
-        container.innerHTML = renderGroupedPosts(grouped, basePath);
+        container.innerHTML = renderGroupedPosts(grouped, base);
     } catch (error) {
         console.error('Failed to load blog posts:', error);
         container.innerHTML = '<p>Failed to load posts.</p>';
@@ -44,7 +45,7 @@ function groupByMonth(posts) {
     return groups;
 }
 
-function renderGroupedPosts(grouped, basePath) {
+function renderGroupedPosts(grouped, base) {
     let html = '';
     for (const [monthYear, posts] of Object.entries(grouped)) {
         html += `<h2 class="blog-month">${monthYear}</h2>`;
@@ -56,7 +57,7 @@ function renderGroupedPosts(grouped, basePath) {
             });
             html += `
                 <li class="blog-item">
-                    <a href="${basePath}/post.html?slug=${post.slug}">
+                    <a href="${base}post.html?slug=${post.slug}">
                         <span class="blog-date">${dateStr}</span>
                         <span class="blog-title">${post.title}</span>
                     </a>

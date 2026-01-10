@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!contentEl) return;
 
     const basePath = typeof getBasePath === 'function' ? getBasePath() : '.';
+    const base = basePath.endsWith('/') ? basePath : basePath + '/';
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('slug');
 
@@ -14,12 +15,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // Fetch the markdown file
-        const mdResponse = await fetch(`${basePath}/blog/posts/${slug}.md`);
+        const mdResponse = await fetch(`${base}blog/posts/${slug}.md`);
         if (!mdResponse.ok) throw new Error('Post not found');
         const markdown = await mdResponse.text();
 
         // Fetch site data to get post metadata
-        const dataResponse = await fetch(`${basePath}/data/site.json`);
+        const dataResponse = await fetch(`${base}data/site.json`);
         const data = await dataResponse.json();
         const postMeta = data.blog.posts.find(p => p.slug === slug);
 

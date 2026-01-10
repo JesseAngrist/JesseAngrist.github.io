@@ -66,10 +66,12 @@ The `slug` must match the markdown filename (without `.md`). I recommend the for
    ```json
    {
      "title": "My New Project",
-     "href": "/projects/my-project.html"
+     "href": "projects/my-project.html"
    }
    ```
    Add this to `nav.items[0].items` (the Projects dropdown array).
+
+   **Note:** Use relative paths without a leading slash (e.g., `projects/...` not `/projects/...`).
 
 ---
 
@@ -84,7 +86,7 @@ Add to the `nav.items` array in `data/site.json`:
 {
   "type": "link",
   "label": "About",
-  "href": "/about.html"
+  "href": "about.html"
 }
 ```
 
@@ -99,8 +101,8 @@ Add to the `nav.items` array:
   "label": "Resources",
   "id": "resources-dropdown",
   "items": [
-    { "title": "Documentation", "href": "/resources/docs.html" },
-    { "title": "Downloads", "href": "/resources/downloads.html" }
+    { "title": "Documentation", "href": "resources/docs.html" },
+    { "title": "Downloads", "href": "resources/downloads.html" }
   ]
 }
 ```
