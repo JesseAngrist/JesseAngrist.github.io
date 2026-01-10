@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "brand": {
+      "text": "Jesse Angrist",
+      "href": "/"
+    },
+    "items": [
+      {
+        "type": "dropdown",
+        "label": "Projects",
+        "id": "projects-dropdown",
+        "items": [
+          {
+            "title": "Transcontinental Transmission and System Impacts",
+            "href": "/projects/MAE573.html"
+          },
+          {
+            "title": "Economics of Agrivoltaic Microgrids in Developing Nations",
+            "href": "/projects/SPI306.html"
+          },
+          {
+            "title": "Regulatory and Decarbonization Study of German Electricity System",
+            "href": "/projects/MAE422.html"
+          }
+        ]
+      },
+      {
+        "type": "link",
+        "label": "Blog",
+        "href": "/blog.html"
+      }
+    ]
+  },
+  "blog": {
+    "posts": [
+      {
+        "title": "Welcome to My Blog",
+        "slug": "2026-01-welcome",
+        "date": "2026-01-15",
+        "summary": "A placeholder post to kick off the blog."
+      }
+    ]
+  }
+}
