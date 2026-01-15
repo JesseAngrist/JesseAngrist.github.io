@@ -11,11 +11,11 @@
         "id": "projects-dropdown",
         "items": [
           {
-            "title": "Transcontinental Transmission and System Impacts",
+            "title": "Long-Distance Transmission Study",
             "href": "/projects/MAE573.html"
           },
           {
-            "title": "Economics of Agrivoltaic Microgrids in Developing Nations",
+            "title": "Solar Microgrids for Electricity Access in Developing Countries",
             "href": "/projects/SPI306.html"
           },
           {
@@ -35,8 +35,8 @@
     "posts": [
       {
         "title": "Welcome to My Blog",
-        "slug": "2026-01-welcome",
-        "date": "2026-01-15",
+        "slug": "welcome",
+        "date": "2026-01-10",
         "summary": "A placeholder post to kick off the blog."
       }
     ]

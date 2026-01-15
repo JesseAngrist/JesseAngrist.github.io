@@ -405,6 +405,15 @@ h2 {
     font-style: italic;
 }
 
+#post-content a {
+    color: var(--accent-4);
+    text-decoration: underline;
+}
+
+#post-content a:hover {
+    color: var(--accent-3);
+}
+
 .loading {
     color: var(--muted);
 }

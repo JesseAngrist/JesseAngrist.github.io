@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const dateStr = new Date(postMeta.date).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
+                timeZone: 'UTC'
             });
             postHtml += `<p class="post-date">${dateStr}</p>`;
             document.getElementById('page-title').textContent =

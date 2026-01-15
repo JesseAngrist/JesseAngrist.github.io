@@ -36,7 +36,8 @@ function groupByMonth(posts) {
         const date = new Date(post.date);
         const key = date.toLocaleDateString('en-US', {
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'
         });
         if (!groups[key]) groups[key] = [];
         groups[key].push(post);
@@ -52,7 +53,8 @@ function renderGroupedPosts(grouped, basePath) {
         for (const post of posts) {
             const dateStr = new Date(post.date).toLocaleDateString('en-US', {
                 month: 'short',
-                day: 'numeric'
+                day: 'numeric',
+                timeZone: 'UTC'
             });
             html += `
                 <li class="blog-item">
