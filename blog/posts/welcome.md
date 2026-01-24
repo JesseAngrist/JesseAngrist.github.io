@@ -1,3 +1,5 @@
+<!-- DEPRECATED: Blog has moved to jesseangrist.substack.com -->
+
 # Welcome to My Blog
 
 This is a placeholder post to demonstrate the blog system.

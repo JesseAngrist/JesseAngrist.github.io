@@ -14,7 +14,9 @@ function buildNavbar(navData, basePath) {
 
     for (const item of navData.items) {
         if (item.type === 'link') {
-            html += `<li><a href="${basePath}${item.href}">${item.label}</a></li>`;
+            const href = item.external ? item.href : `${basePath}${item.href}`;
+            const target = item.external ? ' target="_blank" rel="noopener"' : '';
+            html += `<li><a href="${href}"${target}>${item.label}</a></li>`;
         } else if (item.type === 'dropdown') {
             html += buildDropdown(item, basePath);
         }

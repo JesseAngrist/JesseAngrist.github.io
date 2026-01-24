@@ -27,7 +27,8 @@
       {
         "type": "link",
         "label": "Blog",
-        "href": "/blog.html"
+        "href": "https://jesseangrist.substack.com",
+        "external": true
       }
     ]
   },

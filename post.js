@@ -1,3 +1,6 @@
+// DEPRECATED: Blog functionality has moved to jesseangrist.substack.com
+// This file is no longer in use and can be removed in a future cleanup.
+
 // Single post viewer logic
 document.addEventListener('DOMContentLoaded', async () => {
     const contentEl = document.getElementById('post-content');

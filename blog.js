@@ -1,3 +1,6 @@
+// DEPRECATED: Blog functionality has moved to jesseangrist.substack.com
+// This file is no longer in use and can be removed in a future cleanup.
+
 // Blog listing page logic
 document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('blog-posts');
