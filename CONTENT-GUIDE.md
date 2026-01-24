@@ -2,37 +2,6 @@
 
 This site uses a JSON-driven architecture. Most content changes only require editing `data/site.json`.
 
-## Adding a Blog Post
-
-1. **Create the markdown file** in `blog/posts/`:
-   ```
-   blog/posts/2026-02-my-post-slug.md
-   ```
-
-2. **Add an entry to `data/site.json`** in the `blog.posts` array:
-   ```json
-   {
-     "title": "My New Post",
-     "slug": "2026-02-my-post-slug",
-     "date": "2026-02-15",
-     "summary": "Optional brief description"
-   }
-   ```
-
-3. **Clear your browser's session storage** (or open a new tab) to see changes.
-
-### Month Grouping
-
-Posts are automatically grouped by month/year on the blog listing page based on the `date` field. The format must be `YYYY-MM-DD`. Posts within the same month appear under a shared heading like "February 2026".
-
-Posts are sorted newest-first, so a post dated `2026-02-15` will appear above one dated `2026-01-15`.
-
-### Slug Convention
-
-The `slug` must match the markdown filename (without `.md`). I recommend the format `YYYY-MM-short-title` to keep files organized chronologically.
-
----
-
 ## Adding a Project
 
 1. **Create the HTML file** in `projects/`:

@@ -31,15 +31,5 @@
         "external": true
       }
     ]
-  },
-  "blog": {
-    "posts": [
-      {
-        "title": "Welcome to My Blog",
-        "slug": "welcome",
-        "date": "2026-01-10",
-        "summary": "A placeholder post to kick off the blog."
-      }
-    ]
   }
 }
