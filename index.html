@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jesse Angrist</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+<body>
+  <div id="graph-container">
+    <svg id="graph-svg"></svg>
+  </div>
+  <div id="card-layer"></div>
+  <div id="travel-overlay" aria-hidden="true"></div>
+  <div id="zoom-toast" aria-live="polite">that's as far out as it goes</div>
+
+  <!-- Compass: appears when "about" node drifts off-screen -->
+  <div id="compass" role="button" tabindex="0" title="return to Jesse">
+    <div class="compass-inner">
+      <svg id="compass-arrow" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+        <polygon points="10,1 19,17 10,13 1,17" fill="currentColor"/>
+      </svg>
+      <span>home</span>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
