@@ -37,13 +37,24 @@ async function main() {
     _updateCompass();
   });
 
+  // How many brand-new nodes the most recent discovery revealed.
+  let lastNewCount = 0;
+
   // Discovery change: reveal newly found nodes to simulation, re-render state
   discovery.onChange((visited, discovered, newlyDiscovered, fromNodeId) => {
+    lastNewCount = newlyDiscovered.length;
     if (newlyDiscovered.length > 0) {
       graph.revealNodes(newlyDiscovered, fromNodeId, discovered);
     }
     _applyState();
   });
+
+  // A card-open can be scheduled to fire after the bloom finishes. If the
+  // user sets off again first, cancel it.
+  let cardOpenTimer = null;
+  function cancelPendingCard() {
+    if (cardOpenTimer) { clearTimeout(cardOpenTimer); cardOpenTimer = null; }
+  }
 
   // Edge/node clicks → pathfind and travel
   graph.onEdgeClick((srcId, tgtId, event) => {
@@ -58,15 +69,27 @@ async function main() {
     if (!path || path.length < 2) return;
 
     content.close();
+    cancelPendingCard();
     travel.travelAlongPath(path);
   });
 
-  // Arrival → discovery update + open content
+  // Arrival → reveal neighbors (staggered bloom), then open the card 0.5s
+  // after the final node has bloomed so it doesn't block the effect.
   travel.onArrive(nodeId => {
-    discovery.arrive(nodeId);
-    content.open(nodeId);
+    cancelPendingCard();
+    discovery.arrive(nodeId);          // schedules the bloom
     graph.markCurrent(nodeId);
     _applyState();
+
+    // Defer the card whenever this arrival reveals any brand-new node(s),
+    // until 0.7s after the last one blooms. No new nodes → open immediately.
+    const now = performance.now();
+    const endsAt = graph.getBloomEndsAt();
+    const delay = (lastNewCount >= 1 && endsAt > now) ? (endsAt - now) + 700 : 0;
+    cardOpenTimer = setTimeout(() => {
+      cardOpenTimer = null;
+      content.open(nodeId);
+    }, delay);
   });
 
   graph.markCurrent(startId);
@@ -79,6 +102,7 @@ async function main() {
     const path = discovery.findPath(current, startId);
     if (path && path.length >= 2) {
       content.close();
+      cancelPendingCard();
       travel.travelAlongPath(path);
     }
   });
@@ -95,7 +119,7 @@ function _applyState() {
   const visited = discovery.getVisited();
   const discovered = discovery.getDiscovered();
   const currentId = travel.getCurrentNode();
-  const reachable = currentId ? discovery.getReachableFrom(currentId) : [];
+  const reachable = currentId ? discovery.getAllReachableFrom(currentId) : [];
 
   graph.applyVisibility(visited, discovered);
   graph.markReachable(reachable, currentId);

@@ -16,6 +16,9 @@ As far as software architecture goes, this setup is obviously highly amenable to
 
 Be liberal about leaving notes for yourself in the section below. Oftentimes I will not be the one adding nodes (unless they're particularly special) and instead you or another agent will, so make sure it's obvious to everyone how to do so.
 
+
+
+
 AGENTS SECTION: USERS WILL NOT INTERACT WITH THIS SECTION
 
 ---
@@ -30,13 +33,16 @@ This is a static GitHub Pages site — no build step, no framework, no bundler. 
 
 | File | Role |
 |------|------|
-| `graph.json` | **Single source of truth.** All nodes, edges, and simulation config live here. Editing this file is how you change the site structure. |
-| `js/graph.js` | D3 force simulation, SVG rendering, zoom/pan, visibility updates. Exposes `getNodePos`, `panTo`, `boostRepulsionAround`, etc. |
-| `js/discovery.js` | Fog-of-war state. Tracks `visited` and `discovered` Sets in `sessionStorage`. `arrive(id)` marks a node visited and reveals its neighbors. |
+| `graph.json` | **The deployed graph** (single source of truth for the live site). New schema: authored node `x`/`y`, edge `length`, and a `classes` hierarchy. Hand-authored in the studio, not edited by hand. |
+| `graphs/` | Version-controlled graph iterations. The deployed graph is whatever bytes are in root `graph.json`; `graphs/*.json` are saved snapshots. See `graphs/README.md`. |
+| `studio/` | **The primary authoring tool** — a local editor (run it, build the graph, deploy a snapshot to root `graph.json`). Never deployed to Pages. |
+| `js/graph.js` | D3 force simulation, SVG rendering, zoom/pan, visibility updates. Seeds from authored `x`/`y` then gently drifts (anchor force). Resolves node color through the class hierarchy. Exposes `getNodePos`, `panTo`, `getConfig`, etc. |
+| `js/discovery.js` | Fog-of-war state. Tracks `visited` and `discovered` Sets in memory (no persistence — every visit is cold). `arrive(id)` marks a node visited and reveals its neighbors. Pure topology — no class/type awareness. |
 | `js/travel.js` | Traversal animation. Animates a traveler dot along an edge at constant pixel speed; camera follows. `canTravel(id)` checks reachability. |
-| `js/content.js` | Loads and displays node content cards. Cards are absolutely-positioned `<div>`s that scale in over the node. Content is fetched from `content/nodes/*.html` and cached. |
+| `js/content.js` | Loads and displays node content cards. The node `content` field is polymorphic: a path → fetched HTML; any other string → inline; null → `hint`/em-dash. |
 | `js/main.js` | Wires everything together. The only file that imports all others. |
-| `content/nodes/` | HTML partials — the inner HTML of each node card. No `<html>`, no `<body>` — just the content fragment. |
+| `content/nodes/` | HTML partials — the inner HTML of file-backed node cards. No `<html>`, no `<body>` — just the fragment. |
+| `tools/gen_sparse*.py` | **Legacy.** The old auto-generation workflow, superseded by the studio. Kept for reference only. |
 
 ### How SVG + content cards interact
 
@@ -44,96 +50,99 @@ The SVG renders the graph (nodes, edges, traveler). Content cards are `<div>`s i
 
 ### Fog-of-war rules
 
+Fog-of-war is **universal** — conceptually the behavior of the root `all` class
+that every class inherits. It is uniform across all nodes (no per-class
+variants today; concrete per-class behavior is hardcoded later if/when needed).
+
 | Node state | Appearance |
 |-----------|-----------|
-| visited | Full color, label shown |
-| discovered + type `core` | Full color, label shown (core nodes are always readable once in range) |
-| discovered + type ≠ `core` | Silhouette: shape at 0.22 opacity, no label |
+| visited | Full color (resolved class color), label shown |
+| discovered, not visited | Silhouette: class color at 0.22 opacity, no label |
 | undiscovered | `opacity: 0`, still in DOM for force simulation |
 
-`discovered` = any node adjacent to any visited node. Discovery persists in `sessionStorage` across page loads.
+`discovered` = any node adjacent to any visited node. **No persistence** —
+every page load starts cold (only `startNode` visited, its neighbors
+discovered). Intentional friction; the map is re-earned each visit.
 
 ---
 
 ## How to Add a Node
 
-**Step 1**: Add to `graph.json` → `nodes[]`:
+**Use the studio.** Run it (`studio/` — see its README), place the node on the
+canvas, draw its edges, write its label and content, pick its class, then save
+a snapshot and deploy it to root `graph.json`. Hand-editing `graph.json` is no
+longer the workflow; the studio owns positions, edge lengths, and the class
+hierarchy.
+
+For reference, a node in the new schema looks like:
 
 ```json
 {
   "id": "my-node",
   "label": "visible label",
-  "type": "content",
-  "colorClass": "node-content",
-  "hint": "shown as tooltip someday",
-  "contentSrc": "content/nodes/my-node.html",
-  "mass": 1.5,
-  "r": 10
+  "class": "reference",
+  "x": 1180.0,
+  "y": 640.0,
+  "content": "content/nodes/my-node.html",
+  "r": 10.0,
+  "hint": null,
+  "mass": 1.5
 }
 ```
 
-**Step 2**: Add at least one edge to `graph.json` → `edges[]`:
-
-```json
-{ "source": "some-existing-node", "target": "my-node", "weight": 1.0 }
-```
-
-**Step 3**: Create `content/nodes/my-node.html` — just an HTML fragment, no boilerplate:
-
-```html
-<h2>My Node</h2>
-<p>Content here.</p>
-```
-
-That's it. The node will appear, be discovered when the user visits a neighbor, and show the card on arrival.
+- `class` references a class in `config.classes` (see below).
+- `x`/`y` are authored simulation-space coordinates. The live site seeds the
+  D3 sim from them, then a weak anchor spring keeps the layout recognizable
+  while it gently drifts ("seed-then-drift").
+- `content`: a path (`…​.html` or `content/…`) is fetched as the card body; any
+  other non-empty string renders inline (short atmospheric text gets the
+  centered/dashed treatment); `null` falls back to `hint`, then an em dash.
+- Edges: `{ "source", "target", "length"?, "weight"? }`. `length` is the
+  authored target distance; omit it to let the edge follow node placement.
 
 ---
 
-## Node Types — Quick Reference
+## Node Classes — hierarchy & color
 
-| type | colorClass | visibility | contentSrc |
-|------|-----------|-----------|-----------|
-| `core` | `node-core` | Always labeled when adjacent to any visited node | Required — rich HTML content |
-| `content` | `node-content` | Silhouette until visited | Required |
-| `reference` | `node-reference` | Silhouette until visited | Required — typically a short stub or external link |
-| `sparse` | `node-sparse` | Silhouette until visited | Omit — uses `sparseText` field instead |
+Classes form a **tree rooted at `all`**, declared in `config.classes`:
 
-### `mass` and peripheral placement
+```json
+"classes": {
+  "all":       { "parent": null,  "color": "#bbb4a8" },
+  "core":      { "parent": "all", "color": "#4a7c8c" },
+  "reference": { "parent": "all", "color": "#8a7c4a" },
+  "poem":      { "parent": "reference" }
+}
+```
 
-`mass` directly scales the repulsion force applied to a node:
-- `mass: 1.0–1.5` → clusters near center
-- `mass: 2.0–2.5` → mid-distance
-- `mass: 3.0–5.0` → pushed to periphery (use for sparse/corridor nodes)
+- Every class except `all` has a `parent`; the chain must reach `all`.
+- **Color resolves up the chain**: a node's color is the first `color` found
+  walking from its class toward `all` (so `poem` above inherits `reference`'s
+  ochre). `all` must always have a `color` (ultimate fallback).
+- A node's `class` may be any class — leaf or interior. A "class of one" is
+  just a class with a single member; the hierarchy already supports it.
+- **Only color is implemented as a class semantic today.** Fog-of-war is the
+  universal `all` behavior. Any other per-class behavior is *hardcoded later*
+  against the hierarchy when a concrete case exists — don't add speculative
+  capability flags to the schema.
+- `js/graph.js` injects `--node-<class>: <resolvedColor>;` at init so CSS that
+  references class colors keeps working though classes are user-defined.
 
-Higher mass also increases the `forceLink` distance, so edges to heavy nodes are longer. This naturally creates large spatial gaps in barren regions.
+### `mass` and `r`
 
-### `r` (node radius in pixels)
-
-- `core` nodes: 12–15
-- `content` nodes: 9–12
-- `reference` nodes: 7–9
-- `sparse` nodes: 4–7
+`mass` (optional, default 1) scales node repulsion; with authored positions it
+is a fine-tuning knob, not the primary layout driver. `r` is the node radius in
+pixels (rough guide: hubs 14–18, normal 9–12, minor 5–8).
 
 ---
 
 ## How to Create a Sparse / Barren Region
 
-Chain several sparse nodes together off a peripheral node, with escalating `mass` values:
-
-```json
-nodes: [
-  { "id": "far-1", "type": "sparse", "mass": 3.5, "r": 6, "sparseText": "the air is different here", ... },
-  { "id": "far-2", "type": "sparse", "mass": 4.5, "r": 5, "sparseText": "", ... },
-  { "id": "far-3", "type": "sparse", "mass": 5.5, "r": 4, "sparseText": "", ... }
-],
-edges: [
-  { "source": "some-peripheral-node", "target": "far-1", "weight": 2.5 },
-  { "source": "far-1", "target": "far-2", "weight": 3.0 },
-  { "source": "far-2", "target": "far-3", "weight": 3.5 }
-]
-```
-
-Leave `sparseText` as `""` for nodes that are truly empty — the card shows nothing, just a dashed border. Use short atmospheric text sparingly for landmarks so users aren't completely lost.
+In the studio, place a chain of small, content-light nodes far out on the
+canvas and connect them with long edges. Distance is now *authored directly*
+(node positions + edge `length`), not coaxed out of mass/charge tuning. Give
+barren nodes empty or short inline `content` (a line of atmospheric text as a
+landmark) so explorers aren't completely lost.
 
 ---
 
@@ -141,9 +150,17 @@ Leave `sparseText` as `""` for nodes that are truly empty — the card shows not
 
 **Why traversal is slow on purpose.** The travel time is proportional to pixel distance, and heavier/more peripheral nodes are literally further away. This is intentional friction — inspired by Piranesi, where knowing the House means knowing how long it takes to get anywhere. Far nodes should feel *earned*. Don't reduce `travelSpeed` below ~80 or increase it above ~200 without thinking about this.
 
-**Why core nodes are always labeled from neighbors.** The résumé-relevant stuff (projects, writing) should be reliably findable even by a stranger who doesn't want to explore. Core nodes break the fog of war rule to serve as navigation anchors. Sparse and reference nodes don't need this.
+**Why fog-of-war is universal (no core exemption).** Earlier builds let `core`
+nodes stay labeled when merely adjacent. That special-case was removed — every
+node, regardless of class, is silhouette-until-visited. The map must be
+explored to be read; nothing is handed over for free.
 
-**Why positions randomize each load.** The graph topology (connections) is fixed in `graph.json`, but `Math.random()` seeds the initial x/y positions before the simulation runs. The same structure reads differently each visit — some routes feel shorter, some longer, clusters form in different corners. This gives the site *texture* that static navigation lacks.
+**Why positions are authored (seed-then-drift).** Positions are no longer
+randomized at load. They are hand-placed in the studio and stored as `x`/`y`.
+The site seeds the simulation from them and a weak anchor spring holds the
+shape, so the layout is *recognizable every visit* — deliberate composition,
+not emergent accident — while the live force sim still gives it gentle,
+floppy motion. The texture now comes from authorship, not RNG.
 
 **Why positioned `<div>`s and not SVG `foreignObject`.** `foreignObject` is inconsistently supported and hard to style across browsers. Content cards as `<div>`s get full CSS, smooth transitions, and reliable behavior. They're repositioned on every tick to follow their node.
 
@@ -214,3 +231,90 @@ First generator tool: `tools/gen_sparse.py` — attaches N sparse nodes from giv
 ### Current graph.json state (end of session 3)
 
 44 nodes total: 3 core (`about`, `projects`, `writing`), 1 content (`curiosities`), 2 reference (`piranesi`, `reed-song`), 38 sparse (`void-01` through `void-38`). 48 edges. Generated with `gen_sparse_radial.py --source about --count 38 --depth 5 --seed 31`. Config: `linkDistance: 52`, `chargeStrength: 230`, `centerStrength: 0.10`, `travelSpeed: 130`.
+
+### Session 4 — Exploration polish
+
+**1. No session persistence.** Removed `sessionStorage` save/restore from `discovery.js` entirely. Every visit starts cold — only `about` visited, only its immediate neighbors discovered. Intentional friction; the graph must be re-earned each time.
+
+**2. Hover response.** All node circles respond to hover with `brightness(1.25)` on a 0.12s ease, giving the graph tactile responsiveness without adding UI chrome.
+
+**3. Zoom clamped to 0.75–1.0.** Removed scale compensation (`_compensateScale`) entirely — nodes and edges now scale exactly in proportion to the zoom transform. The zoom window is tight: you can only pull back 25%, no zooming in past default. The toast still fires at the zoom floor.
+
+**4. Scale compensation removed.** Previously nodes/edges counter-scaled on zoom. Now they scale proportionally with D3's transform — cleaner and more readable.
+
+**5. Sparse mesh denser.** Regenerated sparse region with `--depth 3 --cross-edges 0.55 --seed 17`. Old graph had ~10 cross-edges; new has 50, avg degree 2.63. Still 44 nodes total.
+
+**6. Sparse node spacing fixed.** Root cause: `chargeStrength * mass` was giving sparse nodes (mass 3–5) repulsion of up to −230, overwhelming the 10px link distance target. Fix: sparse nodes now get a flat −8 charge regardless of mass. Their peripheral position is maintained by the long arm link distances (core→sparse edges still use avgMass scaling), not by mutual repulsion. Core node link distance raised back to `linkDistance: 20`; `sparseLinkDistance: 10` added as a separate config key for sparse-sparse edges.
+
+**7. Edge visibility rule tightened.** Edges now render only when at least one endpoint has been **visited** (not just discovered). Previously, discovering node B from visiting A would cascade B's edges into view — revealing B's connection to, say, `writing` — even if you'd never been near either. The new rule: `visitedSet.has(s) || visitedSet.has(t)`.
+
+**8. Core nodes democratized.** Removed the special rule that gave `core` nodes full color and labels when merely adjacent to a visited node. All nodes — core included — are now equal: silhouette when discovered, full appearance only when visited. The user must explore to find everything.
+
+**9. All nodes and edges 33% larger.** Node `r` values in `graph.json` multiplied by 1.33. Edge stroke widths scaled up in `style.css` (1.5→2px base, 2→2.7px reachable). Traveler dot 5→7px.
+
+**10. Visited nodes breathe.** A CSS keyframe animation (`node-breathe`, 7s, alternate) applies a slow 1.0→1.18 scale pulse to visited node circles. The explored territory feels alive.
+
+**11. Ambient stir.** A `setInterval` (3.8s) in `graph.js` nudges one random discovered node with a small random velocity (±1.1 px/tick). The simulation never fully settles. Keeps the graph feeling like a living place rather than a static diagram.
+
+### Current graph.json state (end of session 4)
+
+44 nodes total (unchanged). 61 edges. Config: `linkDistance: 20`, `sparseLinkDistance: 10`, `chargeStrength: 46`, `centerStrength: 0.10`, `travelSpeed: 130`. Sparse region regenerated with `gen_sparse_radial.py --graph /tmp/base_graph.json --source about --count 38 --depth 3 --cross-edges 0.55 --seed 17`.
+
+### Session 5 — Authoring pivot: hand-built graph + design studio
+
+The big direction change: **auto-generation is dead.** The graph is now
+hand-authored in a local **design studio** (`studio/`), which is the primary
+way the site is created. `tools/gen_sparse*.py` are legacy.
+
+**1. New `graph.json` schema.** Nodes carry authored `x`/`y` and a single
+polymorphic `content` field; edges carry an optional authored `length`.
+`type`/`colorClass`/`contentSrc`/`sparseText` are gone.
+
+**2. Hierarchical classes replace `type`.** `config.classes` is a tree rooted
+at `all`; each class is `{ parent, color? }`. Color resolves up the parent
+chain. Fog-of-war is the universal `all` behavior. Concrete per-class behavior
+is intentionally *not* designed yet — hardcode it later against the hierarchy
+when a real case exists (no speculative capability flags).
+
+**3. Seed-then-drift (`js/graph.js`).** Deleted `_bfsRadialLayout`. The sim now
+seeds from authored `x`/`y` (captured as `_ax/_ay` per node before
+center-pinning undiscovered ones). New `_makeAnchorForce` is a weak spring
+toward each node's authored anchor. `forceLink.distance` uses authored edge
+`length` (or derived from authored positions). Sparse charge/`sparseLinkDistance`
+special cases removed. Alpha lifecycle: no silent pre-run; one visible
+`seedAlpha` settle, then steady `driftAlpha`. New config keys: `anchorStrength`,
+`driftAlpha`, `seedAlpha`, `edgeLengthScale`. `chargeStrength` 46→26,
+`centerStrength` 0.10→0.02. `revealNodes` now spawns nodes at the discovering
+node and lets the anchor+link forces glide them to their authored slot.
+
+**4. Class color resolution.** `_resolveColor`/`_classColor` walk the hierarchy;
+`_injectClassColors` writes `--node-<class>` CSS vars at init. All
+`var(--${colorClass})` usages replaced. `applyVisibility` simplified to uniform
+fog (no sparse outline branch).
+
+**5. `js/content.js`.** `_loadContent` dispatches on the `content` field
+(path → fetch, string → inline, null → hint). `.sparse-card` styling now keyed
+on "is the content inline" rather than `type === 'sparse'`.
+
+**6. No migration.** The old 44-node generated graph was discarded. Root
+`graph.json` is now a minimal new-schema starter (classes `all`/`core`/
+`content`/`reference`; one node `about`). The real graph is rebuilt in the
+studio. Iterations live in `graphs/`; the deployed graph is whatever is in
+root `graph.json`.
+
+**7. The studio (`studio/`).** Local editor: stationary canvas (place/move
+nodes, draw edges), hierarchical class editor (tree + colors + inheritance),
+node inspector (label/class/content/r/hint/mass), live integrity linter, lite
+static fog preview, snapshots + visual diff, deploy-to-root. Saves via a tiny
+local server handling `/api/*` file writes. (Stack finalized with the user;
+build pending Node.js availability on the machine.)
+
+`js/discovery.js` and `js/travel.js` unchanged (pure topology/geometry).
+
+### Current graph.json state (start of session 5)
+
+Minimal new-schema starter: 4 classes (`all`, `core`, `content`, `reference`),
+1 node (`about`, class `core`), 0 edges. Config: `chargeStrength: 26`,
+`linkDistance: 20`, `centerStrength: 0.02`, `anchorStrength: 0.05`,
+`driftAlpha: 0.035`, `seedAlpha: 0.3`, `edgeLengthScale: 1.0`,
+`travelSpeed: 130`. The real graph is authored in the studio.

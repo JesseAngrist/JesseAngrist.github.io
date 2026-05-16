@@ -44,6 +44,23 @@ export function getReachableFrom(id) {
   return [...(neighborsOf[id] ?? [])].filter(n => discovered.has(n));
 }
 
+// Every discovered node reachable from `id` through the discovered subgraph
+// (i.e. anywhere findPath could take you), excluding `id` itself.
+export function getAllReachableFrom(id) {
+  const seen = new Set([id]);
+  const queue = [id];
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    for (const nb of neighborsOf[cur] ?? []) {
+      if (!discovered.has(nb) || seen.has(nb)) continue;
+      seen.add(nb);
+      queue.push(nb);
+    }
+  }
+  seen.delete(id);
+  return [...seen];
+}
+
 // BFS through discovered nodes only; returns full path or null
 export function findPath(fromId, toId) {
   if (fromId === toId) return [fromId];

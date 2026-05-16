@@ -68,6 +68,7 @@ async function _animateLeg(sourceId, targetId) {
   if (!srcNode || !tgtNode) return;
 
   const zoomG = graph.getZoomG();
+  const travelLayer = graph.getTravelLayer(); // sits beneath the node layer
   const svgEl = graph.getSvg().node();
 
   // Compute initial distance for duration (nodes may drift a little, but this is close enough)
@@ -84,12 +85,12 @@ async function _animateLeg(sourceId, targetId) {
   }).raise();
 
   // Trail line — updates both endpoints every frame to track drifting nodes
-  const trailLine = zoomG.append('line')
+  const trailLine = travelLayer.append('line')
     .attr('class', 'edge-trail')
     .attr('x1', srcNode.x).attr('y1', srcNode.y)
     .attr('x2', srcNode.x).attr('y2', srcNode.y);
 
-  const traveler = zoomG.append('circle')
+  const traveler = travelLayer.append('circle')
     .attr('class', 'traveler')
     .attr('cx', srcNode.x)
     .attr('cy', srcNode.y);

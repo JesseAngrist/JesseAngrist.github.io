@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>typography mockup — monospace — not the live site</title>
+
+<!-- Mockup only: pulls candidate faces from Google Fonts so you can see the
+     feel. The real implementation would self-host subsetted .woff2 and touch
+     only style.css + a fonts/ folder. Not linked from the site, not deployed. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fira+Code:wght@400;500&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Inconsolata:wght@400;600&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&family=Martian+Mono:wght@400;600&family=Source+Code+Pro:ital,wght@0,400;0,600;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --bg:#f5f2ec; --card-bg:#fff; --card-text:#2a2420;
+    --card-muted:#7a6e65; --card-border:rgba(0,0,0,0.07);
+    --link:#4a7c8c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--card-text)}
+  body{padding:48px 32px 96px;
+    font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  .page-head{max-width:760px;margin:0 auto 40px;text-align:center}
+  .page-head h1{font-weight:500;font-size:1.1rem;letter-spacing:.06em;
+    text-transform:uppercase}
+  .page-head p{color:var(--card-muted);font-size:.78rem;margin-top:10px;
+    line-height:1.6}
+
+  .grid{display:grid;gap:38px;max-width:1240px;margin:0 auto;
+    grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+
+  .spec{display:flex;flex-direction:column;gap:13px}
+  .spec-name{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--card-muted)}
+  .spec-name b{color:var(--card-text)}
+  .spec-note{font-size:.72rem;color:var(--card-muted);line-height:1.55}
+
+  /* faithful copy of the live .node-card shell */
+  .card{
+    background:var(--card-bg);
+    border-radius:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07),0 8px 32px rgba(0,0,0,.10);
+    border:1px solid var(--card-border);
+    padding:1.55rem 1.7rem;
+    max-width:430px;
+  }
+  /* proposed mono scale + rhythm — identical for every face so you judge
+     the face, not the spacing */
+  .card h2{
+    font-weight:500;
+    font-size:.92rem;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    margin-bottom:.5rem;
+  }
+  .rule{height:1px;background:var(--card-border);margin:0 0 .85rem;border:0}
+  .card p{font-size:.86rem;line-height:1.66;margin-bottom:.7rem}
+  .card p:last-child{margin-bottom:0}
+  .card a{color:var(--link);text-decoration:none;
+    border-bottom:1px solid rgba(74,124,140,.45)}
+  .card .atmo{font-style:italic;color:var(--card-muted)}
+
+  /* the node label as it floats on the canvas */
+  .label-strip{display:flex;gap:24px;align-items:baseline;flex-wrap:wrap;
+    padding:8px 4px}
+  .node-label{font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--card-text);opacity:.9}
+  .node-label.lc{text-transform:none;letter-spacing:.05em;font-size:.9rem;
+    opacity:.85}
+
+  /* per-section face assignment */
+  .f-courier,.f-courier *{font-family:'Courier New',monospace}
+  .f-jetbrains,.f-jetbrains *{font-family:'JetBrains Mono',monospace}
+  .f-plex,.f-plex *{font-family:'IBM Plex Mono',monospace}
+  .f-fira,.f-fira *{font-family:'Fira Code',monospace}
+  .f-fira .card p{font-feature-settings:"calt" 1,"liga" 1} /* ligatures on */
+  .f-source,.f-source *{font-family:'Source Code Pro',monospace}
+  .f-space,.f-space *{font-family:'Space Mono',monospace}
+  .f-inconsolata,.f-inconsolata *{font-family:'Inconsolata',monospace}
+  .f-dm,.f-dm *{font-family:'DM Mono',monospace}
+  .f-martian,.f-martian *{font-family:'Martian Mono',monospace}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>monospace direction — same words, same spacing</h1>
+  <p>baseline = the system Courier the node labels already use ·
+     every candidate uses one mono family for everything + the proposed
+     scale/rhythm so you're judging the face, not the layout</p>
+</div>
+
+<div class="grid">
+
+  <!-- COURIER (baseline) -->
+  <section class="spec f-courier">
+    <div class="spec-name"><b>Courier New</b> — system (baseline)</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">what the labels render in today. Thin, dated,
+      uneven on screen — the "do nothing" reference point.</div>
+  </section>
+
+  <!-- JETBRAINS MONO -->
+  <section class="spec f-jetbrains">
+    <div class="spec-name"><b>JetBrains Mono</b> — IDE standard</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">tall x-height, very legible, faintly technical.
+      Reads "engineer" without trying. Safe, strong default.</div>
+  </section>
+
+  <!-- IBM PLEX MONO -->
+  <section class="spec f-plex">
+    <div class="spec-name"><b>IBM Plex Mono</b> — humanist</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">warmest mono here — softened terminals, real
+      italic. Best of the bunch for reading whole paragraphs.</div>
+  </section>
+
+  <!-- FIRA CODE -->
+  <section class="spec f-fira">
+    <div class="spec-name"><b>Fira Code</b> — ligatures on</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse — I study energy systems; I like Ideas &gt;&gt;= and
+         arrows like -&gt; != == that ligate.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">Mozilla's; programming ligatures (-&gt; != ==
+      fuse). Most overtly "I code." No italic. The geek flex.</div>
+  </section>
+
+  <!-- SOURCE CODE PRO -->
+  <section class="spec f-source">
+    <div class="spec-name"><b>Source Code Pro</b> — neutral</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">Adobe's; clean and characterless by design.
+      Safest, also the least "only this guy." The control sample.</div>
+  </section>
+
+  <!-- SPACE MONO -->
+  <section class="spec f-space">
+    <div class="spec-name"><b>Space Mono</b> — personality</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">Colophon × Google. Retro-future, quirky, lots of
+      voice. The most memorable / "this guy" — tiring in long blocks.</div>
+  </section>
+
+  <!-- INCONSOLATA -->
+  <section class="spec f-inconsolata">
+    <div class="spec-name"><b>Inconsolata</b> — readable</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">humanist, narrow, elegant — the classic "mono
+      that reads like text." Quietly refined; less overtly coder.</div>
+  </section>
+
+  <!-- DM MONO -->
+  <section class="spec f-dm">
+    <div class="spec-name"><b>DM Mono</b> — editorial</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">Colophon. Low-contrast, restrained, true italic.
+      Stylish and modern without shouting. Great atmospheric italic.</div>
+  </section>
+
+  <!-- MARTIAN MONO -->
+  <section class="spec f-martian">
+    <div class="spec-name"><b>Martian Mono</b> — wildcard</div>
+    <div class="card">
+      <h2>About Me</h2>
+      <hr class="rule" />
+      <p>I'm Jesse. I'm a rising junior in the Math department at Princeton.
+         I really, earnestly like Ideas.</p>
+      <p>All my public-facing writing is on my <a href="#">Substack</a>.</p>
+      <p class="atmo">the light is different here</p>
+    </div>
+    <div class="label-strip">
+      <span class="node-label">CURRENT-TOPICS</span>
+      <span class="node-label lc">About this Site</span>
+    </div>
+    <div class="spec-note">geometric, semi-condensed, architectural. Striking
+      for labels/headings; heavier going as body. Boldest identity.</div>
+  </section>
+
+</div>
+</body>
+</html>
