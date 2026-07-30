@@ -76,12 +76,12 @@ export function descendants(
   return out;
 }
 
-// Mirrors js/content.js: a path-looking string is fetched; anything else is
-// inline content.
+// Mirrors js/content.js: a path-looking string is fetched (as Markdown);
+// anything else is inline content.
 export function isContentPath(s: unknown): boolean {
   if (typeof s !== 'string') return false;
   const v = s.trim();
-  return /\.html?$/i.test(v) || v.startsWith('content/');
+  return /\.(html?|md)$/i.test(v) || v.startsWith('content/');
 }
 
 export function edgeKey(s: string, t: string) {

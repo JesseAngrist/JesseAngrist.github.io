@@ -44,7 +44,8 @@ The studio reads and writes the real project files (via a tiny local save
 server built into its dev server):
 
 - it loads/saves the graph to `graph.json` and named iterations in `graphs/`,
-- it writes node content to `content/nodes/*.html`,
+- it writes node content to `content/nodes/*.md`, with a raw Markdown editor
+  and a live rendered preview underneath,
 - it has a live integrity linter, a cold-start fog-of-war preview, and a
   visual diff between iterations.
 
@@ -65,7 +66,7 @@ js/                    # the site (vanilla ES modules, D3 via CDN)
   discovery.js         # fog-of-war state (visited / discovered)
   travel.js            # node-to-node traversal animation
   content.js           # the expanding content cards
-content/nodes/*.html   # per-node HTML fragments (file-backed node content)
+content/nodes/*.md     # per-node Markdown fragments (file-backed node content)
 graphs/                # version-controlled graph iterations (see graphs/README.md)
 studio/                # local graph design studio (Vite/React, NOT deployed)
 tools/gen_sparse*.py   # legacy auto-generators, superseded by the studio
@@ -82,7 +83,8 @@ CLAUDE.md              # the deep reference (architecture, schema, devlog)
   color. Class behavior beyond color is intentionally minimal for now.
 - `nodes` — `{ id, label, class, x, y, content, r, hint?, mass? }`. Positions
   are authored; the live site seeds its simulation from them and then drifts.
-  `content` is a path (fetched as HTML), an inline string, or `null`.
+  `content` is a path (fetched and rendered as Markdown), an inline Markdown
+  string, or `null`.
 - `edges` — `{ source, target, length?, weight? }`. `length` is an optional
   authored distance; omit it and the edge follows node placement.
 

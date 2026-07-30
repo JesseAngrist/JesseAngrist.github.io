@@ -119,14 +119,6 @@ export function init(data, width, height, initialDiscovered) {
 
   // SVG
   svg = d3.select('#graph-svg').attr('width', width).attr('height', height);
-  const defs = svg.append('defs');
-  defs.append('filter').attr('id', 'glow').html(`
-    <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-    <feMerge>
-      <feMergeNode in="coloredBlur"/>
-      <feMergeNode in="SourceGraphic"/>
-    </feMerge>
-  `);
 
   zoomG = svg.append('g').attr('class', 'zoom-group');
 
@@ -344,7 +336,14 @@ function _render(nodes, links) {
     .join(enter => {
       const g = enter.append('g')
         .attr('class', d => `node-group node-group-${d.id}`)
-        .attr('data-id', d => d.id);
+        .attr('data-id', d => d.id)
+        // Put the node's resolved class colour on the group's `color` property
+        // so `currentColor` works for anything inside it (the halo, and any
+        // future stroke that should take the node's own hue). Without this,
+        // `currentColor` in the node CSS resolved to the document default —
+        // i.e. black — which is why the old current-node glow read as a grubby
+        // dark smudge rather than a coloured halo.
+        .style('color', d => _classColor(d));
 
       // Opaque backing so edges pass *under* the node — the node reads whole.
       g.append('circle').attr('class', 'node-bg')
@@ -355,9 +354,17 @@ function _render(nodes, links) {
         .attr('r', d => d.r ?? 8)
         .attr('fill', d => _classColor(d));
 
-      // Target indicator ring (hidden until .target class applied)
-      g.append('circle').attr('class', 'target-ring')
-        .attr('r', d => (d.r ?? 8) + 5);
+      // Presence halo — a concentric ring, invisible until this node is the
+      // one you're standing in (.current). Also the old, never-wired
+      // `.target-ring`; the pathfinding target is signalled by the circle
+      // blink instead, so the element was inert.
+      // `fill`/`stroke` are also set in CSS; they're repeated here as
+      // attributes so that a cached style.css can never leave this circle at
+      // the SVG default (black, opaque) and blot out the node beneath it.
+      g.append('circle').attr('class', 'node-halo')
+        .attr('r', d => (d.r ?? 8) + 5)
+        .attr('fill', 'none')
+        .attr('stroke', 'none');
 
       g.append('text').attr('class', 'node-label')
         .attr('dy', d => -(d.r ?? 8) - LABEL_GAP)

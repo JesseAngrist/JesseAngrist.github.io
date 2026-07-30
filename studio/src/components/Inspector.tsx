@@ -1,4 +1,5 @@
 import React from 'react';
+import { marked } from 'marked';
 import type { Graph, Selection } from '../types';
 import { isContentPath } from '../classUtils';
 
@@ -12,7 +13,7 @@ interface Props {
   onPatchEdge: (key: string, patch: Record<string, unknown>) => void;
   onDeleteEdge: (key: string) => void;
   onSetStartNode: (id: string) => void;
-  onFileBodyChange: (id: string, html: string) => void;
+  onFileBodyChange: (id: string, md: string) => void;
 }
 
 export default function Inspector(p: Props) {
@@ -22,8 +23,10 @@ export default function Inspector(p: Props) {
     const n = graph.nodes.find((x) => x.id === selection.id);
     if (!n) return <div className="hint">node not found</div>;
     const fileMode = isContentPath(n.content);
-    const filePath = `content/nodes/${n.id}.html`;
+    const filePath = `content/nodes/${n.id}.md`;
     const isStart = graph.config.startNode === n.id;
+    const rawContent = fileMode ? p.fileBody : (typeof n.content === 'string' ? n.content : '');
+    const previewHtml = rawContent.trim() ? (marked.parse(rawContent) as string) : '<span class="hint">nothing to preview yet</span>';
 
     return (
       <div>
@@ -92,14 +95,16 @@ export default function Inspector(p: Props) {
           {fileMode ? `→ ${filePath} (written on save)` : 'inline (stored in graph.json)'}
         </div>
         <textarea
-          value={fileMode ? p.fileBody : (typeof n.content === 'string' ? n.content : '')}
-          placeholder={fileMode ? '<h2>…</h2><p>…</p>' : 'inline HTML or a line of text'}
+          value={rawContent}
+          placeholder={fileMode ? '## Heading\n\nBody text, _emphasis_, [links](https://…)' : 'inline markdown or a line of text'}
           onChange={(e) =>
             fileMode
               ? p.onFileBodyChange(n.id, e.target.value)
               : p.onPatchNode(n.id, { content: e.target.value || null })
           }
         />
+        <div className="hint" style={{ marginTop: 8 }}>rendered preview</div>
+        <div className="md-preview" dangerouslySetInnerHTML={{ __html: previewHtml }} />
 
         <div className="row" style={{ marginTop: 8 }}>
           <button

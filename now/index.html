@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Now — Jesse Angrist</title>
+  <!--
+    /now is a doorway, not a page. GitHub Pages serves this file for /now/,
+    and it hands off to the graph's `now` node via the URL fragment, which
+    js/main.js reads at load and uses as the effective start node.
+
+    Paths are relative (`../`) so this works both on a custom domain and on a
+    project page served from a subdirectory.
+  -->
+  <link rel="canonical" href="../#now">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="refresh" content="0; url=../#now">
+  <script>location.replace('../#now');</script>
+  <style>
+    body {
+      background: #f5f2ec;
+      color: #7a6e65;
+      font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+      font-size: 0.85rem;
+      display: grid;
+      place-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="../#now" style="color: #4a7c8c;">→ now</a></p>
+</body>
+</html>

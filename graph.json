@@ -37,143 +37,55 @@
   "nodes": [
     {
       "id": "home",
-      "label": "Welcome",
+      "label": "Welcome!",
       "class": "core",
       "x": 0,
       "y": 0,
-      "content": "content/nodes/home.html",
-      "r": 25,
+      "content": "content/nodes/home.md",
+      "r": 36,
       "hint": null,
       "mass": 2
-    },
-    {
-      "id": "contact",
-      "label": "Reach out!",
-      "class": "core",
-      "x": 135,
-      "y": 0,
-      "content": "content/nodes/contact.html",
-      "r": 10,
-      "hint": null,
-      "mass": 1
     },
     {
       "id": "about",
       "label": "About Me",
       "class": "core",
-      "x": 53,
-      "y": -83,
-      "content": "content/nodes/about.html",
+      "x": 87,
+      "y": -75,
+      "content": "content/nodes/about.md",
+      "r": 18,
+      "hint": null,
+      "mass": 1
+    },
+    {
+      "id": "contact",
+      "label": "Reach out!",
+      "class": "core",
+      "x": 171,
+      "y": -29,
+      "content": "content/nodes/contact.md",
+      "r": 10,
+      "hint": null,
+      "mass": 1
+    },
+    {
+      "id": "books",
+      "label": "Bookshelf",
+      "class": "content",
+      "x": 46,
+      "y": -155,
+      "content": "content/nodes/books.md",
       "r": 15,
       "hint": null,
       "mass": 1
     },
     {
-      "id": "current-topics",
-      "label": "thinking a lot about...",
-      "class": "all",
-      "x": 108,
-      "y": 92,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "math-hub",
-      "label": "math",
-      "class": "content",
-      "x": 206,
-      "y": 37,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "music-hub",
-      "label": "music",
-      "class": "content",
-      "x": 218,
-      "y": 103,
-      "content": "",
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "meditation-hub",
-      "label": "meditation",
-      "class": "content",
-      "x": 190,
-      "y": 165,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "AI",
-      "label": "AI",
-      "class": "content",
-      "x": 123,
-      "y": 196,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "education-hub",
-      "label": "education",
-      "class": "content",
-      "x": 44,
-      "y": 179,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "work",
-      "label": "My Work",
+      "id": "now",
+      "label": "nownownow!",
       "class": "core",
-      "x": -138,
-      "y": 33,
-      "content": "content/nodes/work.html",
-      "r": 13,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "substack",
-      "label": "Substack",
-      "class": "core",
-      "x": 208,
-      "y": -40,
-      "content": "content/nodes/substack.html",
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "about-site",
-      "label": "About this Site",
-      "class": "core",
-      "x": 106,
-      "y": -146,
-      "content": "content/nodes/about-site.html",
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "coming-up",
-      "label": "Coming Up",
-      "class": "core",
-      "x": -65,
-      "y": -51,
-      "content": "content/nodes/coming-up.html",
+      "x": 182,
+      "y": -118,
+      "content": "content/nodes/now.md",
       "r": 10,
       "hint": null,
       "mass": 1
@@ -181,8 +93,8 @@
   ],
   "edges": [
     {
-      "source": "home",
-      "target": "contact",
+      "source": "about",
+      "target": "home",
       "weight": 1
     },
     {
@@ -191,58 +103,13 @@
       "weight": 1
     },
     {
-      "source": "current-topics",
-      "target": "home",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "math-hub",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "music-hub",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "meditation-hub",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "AI",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "education-hub",
-      "weight": 1
-    },
-    {
       "source": "about",
-      "target": "home",
+      "target": "books",
       "weight": 1
     },
     {
-      "source": "coming-up",
-      "target": "home",
-      "weight": 1
-    },
-    {
-      "source": "home",
-      "target": "work",
-      "weight": 1
-    },
-    {
-      "source": "about",
-      "target": "about-site",
-      "weight": 1
-    },
-    {
-      "source": "contact",
-      "target": "substack",
+      "source": "now",
+      "target": "about",
       "weight": 1
     }
   ]

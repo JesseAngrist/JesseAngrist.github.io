@@ -64,18 +64,18 @@ export function lintGraph(graph: Graph, contentIds: string[]): LintItem[] {
   const idSetForContent = new Set<string>();
   for (const n of nodes) {
     if (isContentPath(n.content)) {
-      const m = String(n.content).match(/([a-zA-Z0-9._-]+)\.html?$/i);
+      const m = String(n.content).match(/([a-zA-Z0-9._-]+)\.(?:html?|md)$/i);
       const cid = m ? m[1] : null;
       if (cid) {
         idSetForContent.add(cid);
         if (!contentIds.includes(cid))
-          out.push({ level: 'error', msg: `Node "${n.id}" content file "${cid}.html" is missing`, focus: { kind: 'node', id: n.id } });
+          out.push({ level: 'error', msg: `Node "${n.id}" content file "${cid}.md" is missing`, focus: { kind: 'node', id: n.id } });
       }
     }
   }
   for (const cid of contentIds)
     if (!idSetForContent.has(cid))
-      out.push({ level: 'warn', msg: `content/nodes/${cid}.html is not referenced by any node` });
+      out.push({ level: 'warn', msg: `content/nodes/${cid}.md is not referenced by any node` });
 
   // ── class hierarchy ────────────────────────────────────────────────────
   const roots = Object.entries(classes).filter(([, d]) => d.parent == null).map(([n]) => n);

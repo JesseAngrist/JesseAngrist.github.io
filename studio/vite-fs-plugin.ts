@@ -106,23 +106,23 @@ export function fsPlugin(): Plugin {
             return send(res, 200, { ok: true, deployed: deploy });
           }
 
-          // ── GET /content?id=ID : read a node's HTML fragment ──────────────
+          // ── GET /content?id=ID : read a node's Markdown fragment ───────────
           if (route === '/content' && method === 'GET') {
             const id = url.searchParams.get('id') || '';
             if (!SAFE_NAME.test(id)) return send(res, 400, { error: 'bad id' });
-            const f = path.join(CONTENT_DIR, `${id}.html`);
-            if (!fs.existsSync(f)) return send(res, 200, { html: '', exists: false });
-            return send(res, 200, { html: fs.readFileSync(f, 'utf8'), exists: true });
+            const f = path.join(CONTENT_DIR, `${id}.md`);
+            if (!fs.existsSync(f)) return send(res, 200, { md: '', exists: false });
+            return send(res, 200, { md: fs.readFileSync(f, 'utf8'), exists: true });
           }
 
-          // ── POST /content : write a node's HTML fragment ──────────────────
+          // ── POST /content : write a node's Markdown fragment ───────────────
           if (route === '/content' && method === 'POST') {
             const body = await readBody(req);
             const id: string = body.id;
-            const html: string = body.html ?? '';
+            const md: string = body.md ?? '';
             if (!id || !SAFE_NAME.test(id)) return send(res, 400, { error: 'bad id' });
             ensureDir(CONTENT_DIR);
-            fs.writeFileSync(path.join(CONTENT_DIR, `${id}.html`), html);
+            fs.writeFileSync(path.join(CONTENT_DIR, `${id}.md`), md);
             return send(res, 200, { ok: true });
           }
 
@@ -131,8 +131,8 @@ export function fsPlugin(): Plugin {
             ensureDir(CONTENT_DIR);
             const ids = fs
               .readdirSync(CONTENT_DIR)
-              .filter((f) => f.endsWith('.html'))
-              .map((f) => f.replace(/\.html$/, ''));
+              .filter((f) => f.endsWith('.md'))
+              .map((f) => f.replace(/\.md$/, ''));
             return send(res, 200, { ids });
           }
 

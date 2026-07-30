@@ -63,7 +63,7 @@ export default function App() {
     if (n && isContentPath(n.content) && fileBodies[n.id] === undefined) {
       api
         .loadContent(n.id)
-        .then((r) => setFileBodies((m) => ({ ...m, [n.id]: r.html })))
+        .then((r) => setFileBodies((m) => ({ ...m, [n.id]: r.md })))
         .catch(() => {});
     }
   }, [selection, graph]);
@@ -354,7 +354,7 @@ export default function App() {
             onPatchEdge={patchEdge}
             onDeleteEdge={deleteEdge}
             onSetStartNode={setStartNode}
-            onFileBodyChange={(id, html) => setFileBodies((m) => ({ ...m, [id]: html }))}
+            onFileBodyChange={(id, md) => setFileBodies((m) => ({ ...m, [id]: md }))}
           />
           <Linter
             items={lint}

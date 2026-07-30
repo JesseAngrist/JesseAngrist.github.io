@@ -1,14 +1,14 @@
 {
   "config": {
     "startNode": "home",
-    "travelSpeed": 130,
+    "travelSpeed": 110.5,
     "alphaTarget": 0.04,
-    "velocityDecay": 0.62,
+    "velocityDecay": 0.55,
     "chargeStrength": 26,
     "linkDistance": 20,
     "centerStrength": 0.02,
-    "anchorStrength": 0.05,
-    "driftAlpha": 0.035,
+    "anchorStrength": 0.015,
+    "driftAlpha": 0.06,
     "seedAlpha": 0.3,
     "edgeLengthScale": 1,
     "classes": {
@@ -37,207 +37,63 @@
   "nodes": [
     {
       "id": "home",
-      "label": "Welcome",
+      "label": "Welcome!",
       "class": "core",
       "x": 0,
       "y": 0,
-      "content": "content/nodes/about.html",
-      "r": 25,
+      "content": "content/nodes/home.md",
+      "r": 36,
       "hint": null,
       "mass": 2
-    },
-    {
-      "id": "contact",
-      "label": "Reach out!",
-      "class": "core",
-      "x": 135,
-      "y": 0,
-      "content": "<h2>Come talk to me about anything!</h2>\n\n<p>Email me at jesseangrist@gmail.com, or message me on <a href=\"https://jesseangrist.substack.com/\">Substack</a>, especially if you've enjoyed something I've written.</p>",
-      "r": 10,
-      "hint": null,
-      "mass": 1
     },
     {
       "id": "about",
       "label": "About Me",
       "class": "core",
-      "x": 53,
-      "y": -83,
-      "content": "<h2>Howdy!</h2>\n\n<p>I'm Jesse. I'm a rising junior in the Math department at Princeton. I really, earnestly like Ideas. Most of my academic and professional work has been concentrated in the energy sector, where I think about technology and policy options to provision humanity with cheap and reliable clean energy.</p>\n\n<p>I love music (it makes my heart sing), and I love teaching. This paragraph is incomplete, you can help by expanding it.</p> ",
+      "x": 87,
+      "y": -75,
+      "content": "content/nodes/about.md",
+      "r": 18,
+      "hint": null,
+      "mass": 1
+    },
+    {
+      "id": "contact",
+      "label": "Reach out!",
+      "class": "core",
+      "x": 181,
+      "y": -73,
+      "content": "content/nodes/about-site.md",
+      "r": 10,
+      "hint": null,
+      "mass": 1
+    },
+    {
+      "id": "books",
+      "label": "Bookshelf",
+      "class": "core",
+      "x": 46,
+      "y": -155,
+      "content": "content/nodes/books.md",
       "r": 15,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "current-topics",
-      "label": "thinking a lot about...",
-      "class": "all",
-      "x": 108,
-      "y": 92,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "math-hub",
-      "label": "math",
-      "class": "content",
-      "x": 206,
-      "y": 37,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "music-hub",
-      "label": "music",
-      "class": "content",
-      "x": 218,
-      "y": 103,
-      "content": "",
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "meditation-hub",
-      "label": "meditation",
-      "class": "content",
-      "x": 190,
-      "y": 165,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "AI",
-      "label": "AI",
-      "class": "content",
-      "x": 123,
-      "y": 196,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "education-hub",
-      "label": "education",
-      "class": "content",
-      "x": 44,
-      "y": 179,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "work",
-      "label": "My Work",
-      "class": "core",
-      "x": -138,
-      "y": 33,
-      "content": null,
-      "r": 13,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "substack",
-      "label": "Substack",
-      "class": "core",
-      "x": 208,
-      "y": -40,
-      "content": "<h2>Turning my head inside-out, so to speak</h2>\n\n<p>All my public facing writing is on my <a href=\"https://jesseangrist.substack.com/\">Substack</a>. ",
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "about-site",
-      "label": "About this Site",
-      "class": "core",
-      "x": 106,
-      "y": -146,
-      "content": null,
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "coming-up",
-      "label": "Coming Up",
-      "class": "core",
-      "x": -65,
-      "y": -51,
-      "content": null,
-      "r": 10,
       "hint": null,
       "mass": 1
     }
   ],
   "edges": [
     {
-      "source": "home",
+      "source": "about",
+      "target": "home",
+      "weight": 1
+    },
+    {
+      "source": "about",
       "target": "contact",
       "weight": 1
     },
     {
-      "source": "current-topics",
-      "target": "home",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "math-hub",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "music-hub",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "meditation-hub",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "AI",
-      "weight": 1
-    },
-    {
-      "source": "current-topics",
-      "target": "education-hub",
-      "weight": 1
-    },
-    {
       "source": "about",
-      "target": "home",
-      "weight": 1
-    },
-    {
-      "source": "coming-up",
-      "target": "home",
-      "weight": 1
-    },
-    {
-      "source": "home",
-      "target": "work",
-      "weight": 1
-    },
-    {
-      "source": "about",
-      "target": "about-site",
-      "weight": 1
-    },
-    {
-      "source": "contact",
-      "target": "substack",
+      "target": "books",
       "weight": 1
     }
   ]

@@ -21,14 +21,14 @@ export const api = {
 
   loadContent: (id: string) =>
     fetch(`/api/content?id=${encodeURIComponent(id)}`).then(
-      j<{ html: string; exists: boolean }>,
+      j<{ md: string; exists: boolean }>,
     ),
 
-  saveContent: (id: string, html: string) =>
+  saveContent: (id: string, md: string) =>
     fetch('/api/content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, html }),
+      body: JSON.stringify({ id, md }),
     }).then(j<{ ok: boolean }>),
 
   contentList: () => fetch('/api/content-list').then(j<{ ids: string[] }>),

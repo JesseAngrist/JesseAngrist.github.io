@@ -27,7 +27,7 @@ AGENTS SECTION: USERS WILL NOT INTERACT WITH THIS SECTION
 
 This is a static GitHub Pages site — no build step, no framework, no bundler. The entire thing loads from `index.html` and a set of ES module JS files.
 
-**The graph is the navigation.** There is no navbar, no routes, no URL changes (yet). Users travel between nodes, which are HTML content cards that expand in place on the SVG canvas.
+**The graph is the navigation.** There is no navbar and no router. Users travel between nodes, which are content cards (authored in Markdown, rendered to HTML) that expand in place on the SVG canvas. The URL is read exactly once, at load: a `#<node-id>` fragment sets the *effective start node* (see "Deep links and /now"). In-session travel never touches the URL.
 
 ### File roles
 
@@ -39,9 +39,9 @@ This is a static GitHub Pages site — no build step, no framework, no bundler. 
 | `js/graph.js` | D3 force simulation, SVG rendering, zoom/pan, visibility updates. Seeds from authored `x`/`y` then gently drifts (anchor force). Resolves node color through the class hierarchy. Exposes `getNodePos`, `panTo`, `getConfig`, etc. |
 | `js/discovery.js` | Fog-of-war state. Tracks `visited` and `discovered` Sets in memory (no persistence — every visit is cold). `arrive(id)` marks a node visited and reveals its neighbors. Pure topology — no class/type awareness. |
 | `js/travel.js` | Traversal animation. Animates a traveler dot along an edge at constant pixel speed; camera follows. `canTravel(id)` checks reachability. |
-| `js/content.js` | Loads and displays node content cards. The node `content` field is polymorphic: a path → fetched HTML; any other string → inline; null → `hint`/em-dash. |
+| `js/content.js` | Loads and displays node content cards. The node `content` field is polymorphic: a path → fetched Markdown; any other string → inline Markdown; null → `hint`/em-dash. Renders via `marked` (loaded as an ESM import from jsdelivr — `import { marked } from 'https://cdn.jsdelivr.net/npm/marked@13/+esm'`). Raw HTML inside a Markdown file/string still passes through unchanged (standard CommonMark behavior), for the rare case that needs it (see `content/nodes/home.md`). |
 | `js/main.js` | Wires everything together. The only file that imports all others. |
-| `content/nodes/` | HTML partials — the inner HTML of file-backed node cards. No `<html>`, no `<body>` — just the fragment. |
+| `content/nodes/` | Markdown partials — the body of file-backed node cards, rendered to HTML at load time. No front-matter, just the Markdown text. |
 | `tools/gen_sparse*.py` | **Legacy.** The old auto-generation workflow, superseded by the studio. Kept for reference only. |
 
 ### How SVG + content cards interact
@@ -83,7 +83,7 @@ For reference, a node in the new schema looks like:
   "class": "reference",
   "x": 1180.0,
   "y": 640.0,
-  "content": "content/nodes/my-node.html",
+  "content": "content/nodes/my-node.md",
   "r": 10.0,
   "hint": null,
   "mass": 1.5
@@ -94,9 +94,11 @@ For reference, a node in the new schema looks like:
 - `x`/`y` are authored simulation-space coordinates. The live site seeds the
   D3 sim from them, then a weak anchor spring keeps the layout recognizable
   while it gently drifts ("seed-then-drift").
-- `content`: a path (`…​.html` or `content/…`) is fetched as the card body; any
-  other non-empty string renders inline (short atmospheric text gets the
-  centered/dashed treatment); `null` falls back to `hint`, then an em dash.
+- `content`: a path (`…​.md` or `content/…`) is fetched and rendered as
+  Markdown for the card body; any other non-empty string renders inline as
+  Markdown too (short atmospheric text gets the centered/dashed treatment);
+  `null` falls back to `hint` (also rendered as Markdown), then an em dash.
+  Raw HTML embedded in the Markdown passes through unchanged if you need it.
 - Edges: `{ "source", "target", "length"?, "weight"? }`. `length` is the
   authored target distance; omit it to let the edge follow node placement.
 
@@ -136,6 +138,50 @@ pixels (rough guide: hubs 14–18, normal 9–12, minor 5–8).
 
 ---
 
+## Linking to Another Node from Card Prose
+
+In any node's Markdown, a link whose href is a **bare fragment** is a node
+link — clicking it sends the traveler there:
+
+```markdown
+You should [take a look at what I'm reading](#books)!
+```
+
+The fragment is the target node's `id`. `content.js` tags these `a.node-link`
+(dotted underline, vs. solid for external links) and intercepts the click; `main.js`
+`navigateTo()` handles it. Links to `http…`, `mailto:` etc. are untouched.
+
+**A node link is an authored door.** If the target is already in the discovered
+subgraph it just pathfinds there like any click. If it *isn't*, the link still
+works: `discovery.findPathAny()` finds the shortest real route ignoring fog,
+`revealPath()` marks that route discovered (**not** visited), the graph blooms
+it in, and then the traveler walks it. So the author can shortcut *discovery*
+but never the *distance* — travel time is still paid, and intermediate nodes are
+still visited by walking through them. If you'd rather links respect the fog
+strictly, delete the `findPathAny` fallback in `navigateTo()`; the link then
+becomes a no-op until the target is discovered.
+
+A link to an unknown id, or to a node in a disconnected component, is a silent
+no-op by design — a dud link should do nothing, not throw.
+
+## Deep links and /now
+
+`js/main.js` reads `location.hash` once at load. If it names a real node, that
+node becomes the **effective start node**: visited, centered, card open, its
+neighbors discovered. Deep links *arrive* rather than tour — the point of a
+shared link is the destination. An unknown fragment falls back to
+`config.startNode` silently.
+
+`/now` (Derek Sivers style) is built on exactly that: `now/index.html` is a
+doorway that redirects to `../#now`. Relative paths, so it works on a custom
+domain and on a project page in a subdirectory. Any other node gets a URL the
+same way — add `<id>/index.html` redirecting to `../#<id>`. Nothing else needs
+per-node URLs, which is why there's no router.
+
+Note the fog-of-war consequence: arriving via `#now` makes `now` the origin, so
+the rest of the graph is explored outward from there. That's intended — a
+visitor who came for /now starts at /now.
+
 ## How to Create a Sparse / Barren Region
 
 In the studio, place a chain of small, content-light nodes far out on the
@@ -169,7 +215,6 @@ floppy motion. The texture now comes from authorship, not RNG.
 ## Future Ideas (not yet implemented)
 
 - **Flood event** (Piranesi reference): A slow visual wash that temporarily dims visited nodes back toward silhouette — fades over ~10 seconds on a timer or interaction trigger. Resets the fog-of-war aesthetic without resetting state.
-- **URL fragment routing** (`#node-id`): Deep-link directly to a node. On load, auto-travel to the fragment target. Lets people share specific nodes.
 - **Seasonal graph mutations**: New sparse nodes appear on certain calendar dates. Implemented by conditionally including extra nodes from `graph.json` based on `new Date()`.
 - **Roof / basement clusters** (à la Alicia Guo's site): A meta-layer of nodes off the main graph — accessible via a special edge from a specific node, like a portal. Could hold more experimental or personal content.
 - **Node age**: Label opacity could fade slightly for nodes not visited in >N days (via `localStorage` timestamps). The graph *ages*.
@@ -318,3 +363,238 @@ Minimal new-schema starter: 4 classes (`all`, `core`, `content`, `reference`),
 `linkDistance: 20`, `centerStrength: 0.02`, `anchorStrength: 0.05`,
 `driftAlpha: 0.035`, `seedAlpha: 0.3`, `edgeLengthScale: 1.0`,
 `travelSpeed: 130`. The real graph is authored in the studio.
+
+### Session 6 — Content format: HTML → Markdown
+
+Node content — both file-backed and inline — is now authored as **Markdown**,
+not hand-written HTML. This was purely an authoring-ergonomics change (no
+schema/topology change): the `content` field is still the same polymorphic
+path/inline-string/null field, it's just interpreted as Markdown now instead
+of raw HTML.
+
+**1. Renderer: `marked`.** Both the live site and the studio render Markdown
+with [`marked`](https://github.com/markedjs/marked), pinned to major `13` in
+both places so preview and live output match:
+- Live site (`js/content.js`): `import { marked } from
+  'https://cdn.jsdelivr.net/npm/marked@13/+esm'` — an ESM CDN import, same
+  buildless pattern as D3, but as a module import rather than a global
+  `<script>` since every other JS file here is already an ES module.
+- Studio: `marked@^13.0.3` as a real npm dependency (`studio/package.json`),
+  imported normally in `Inspector.tsx`.
+
+Raw HTML inside a Markdown file/string still passes through unchanged — this
+is standard CommonMark behavior, not a special case `marked` needed
+configuring for. `content/nodes/home.md` uses this deliberately (a
+`<p style="color: grey;">` line that plain Markdown has no syntax for).
+
+**2. `content/nodes/*.html` → `*.md`.** All seven files renamed
+(`git mv`) and their bodies converted (`<h2>` → `##`, `<p>` → blank-line
+paragraphs, `<a href>` → `[text](url)`). Three were already empty
+(`about-site.md`, `coming-up.md`, `work.md`) and just got renamed. All
+`graph.json` `content` paths updated to match — including the two saved
+snapshots in `graphs/` (`first-draft.json`, `iteration-1.json`), so old
+iterations still resolve their content files if reloaded in the studio.
+
+**3. `_isContentPath` (`js/content.js` and its studio mirror
+`classUtils.ts`).** Path-detection regex widened from `/\.html?$/i` to
+`/\.(html?|md)$/i` — `.md` is the convention going forward, `.html` still
+matches so nothing already on a path with that extension silently stops
+being treated as a path.
+
+**4. Studio plumbing renamed `html` → `md`.** The `/api/content` read/write
+route in `vite-fs-plugin.ts` now reads/writes `content/nodes/<id>.md` instead
+of `.html`, and every identifier along that pipe that held HTML text and now
+holds Markdown text was renamed to match: the JSON field (`{ md }` instead of
+`{ html }`), `api.ts`'s `loadContent`/`saveContent` signatures, and the two
+call sites in `App.tsx`. Left `fileBody(ies)`/`onFileBodyChange` as-is — that
+naming is about *file-backed vs. inline*, not format, and didn't need to
+change. `lint.ts`'s content-file-existence check and its messages updated to
+`.md` too.
+
+**5. Studio Inspector: raw + rendered preview.** `Inspector.tsx`'s content
+`<textarea>` (raw Markdown, whichever of file-body/inline is active) is now
+followed by a live-rendered `.md-preview` div (`marked.parse(rawContent)` via
+`dangerouslySetInnerHTML`), styled in `styles.css` to look like readable prose
+rather than a raw HTML dump — not a pixel-accurate replica of the live
+`.node-card` styling (that would mean importing the site's own `style.css`
+across the studio/site boundary), just a legible typographic pass (headings,
+links in `--accent`, code, blockquotes, lists). Note: the preview is computed
+inline in the render body rather than `useMemo`'d — `Inspector` has early
+returns above where the hook would need to live (`if (!n) return …`), so a
+conditional `useMemo` would violate the rules of hooks; content is short
+enough that re-parsing per keystroke is a non-issue.
+
+**6. Current `graph.json` reality check.** The "1 node" starter description
+in the section above (start of session 5) is long stale — the graph has since
+grown to 13 nodes / 13 edges by hand in the studio (`home` as `startNode`,
+plus `contact`, `about`, `work`, `substack`, `about-site`, `coming-up`,
+`current-topics`, and five barren `content`-class hub stubs: `math-hub`,
+`music-hub`, `meditation-hub`, `AI`, `education-hub`). Seven of those nodes
+are file-backed; all seven now point at `.md`.
+### Session 7 — In-card links, deep links / `/now`, card scrolling
+
+**1. In-card node links.** `[text](#node-id)` in any card's Markdown now travels
+to that node. `content.js` gained `_wireNodeLinks()` (tags bare-fragment anchors
+`a.node-link`, delegates their clicks) and an `onNodeLink(cb)` export. Wired in
+`main.js` to the new shared `navigateTo()`. See "Linking to Another Node from
+Card Prose" above for the authored-door semantics and how to make links respect
+the fog strictly instead.
+
+**2. `navigateTo()` is now the single travel entry point.** Edge/node clicks,
+the compass, and in-card links all funnel through it — the compass handler
+collapsed from 10 lines to one, and the click handler lost its duplicated
+pathfind. It also owns `tripTimer`, needed because the reveal path defers the
+trip until the bloom finishes (`graph.getBloomEndsAt()` + 250ms); a new
+navigation cancels a pending one.
+
+**3. `discovery.js`: `findPathAny()` + `revealPath()`.** `findPathAny` is
+`findPath` without the `discovered.has()` filter. `revealPath` adds a route to
+`discovered` (never `visited`) and fires `onChange` with the newcomers, which
+reuses the existing `graph.revealNodes()` bloom machinery unchanged.
+
+**4. Deep links (`#<node-id>`) + `/now`.** One `location.hash` read in `main()`
+picks the effective start node; `now/index.html` redirects to `../#now`. This
+implements the old "URL fragment routing" future idea, so it's been removed from
+that list. Deviation from how it was sketched there: it does *not* auto-travel to
+the target, it *starts* you there — auto-travel from `startNode` would mean
+watching a multi-leg trip before reading the thing you clicked a link for.
+
+**5. Card scrolling.** The card body is now its own scroll container
+(`.card-body`, `max-height: min(62vh, 560px)`), so the card's chrome stays fixed
+while prose moves. Thin warm scrollbar (Firefox `scrollbar-*` + WebKit
+pseudo-elements, thumb inset via `background-clip: content-box`). A
+`.node-card::after` bottom fade turns on via the `.overflowing` class only while
+there's more to read and clears at the end, so a fully-read card looks finished
+rather than perpetually cut off; `_wireOverflow()` in `content.js` toggles it on
+scroll, re-measuring on rAF + 400ms since webfonts can land after first paint.
+Suppressed on `.sparse-card` (no surface to fade into). Prompted by `books`
+overflowing the viewport.
+
+**6. `about.md`** got the first real node link, on its existing closing sentence
+("You should take a look at what I'm reading!" → `#books`).
+
+### Current graph.json state (session 7)
+
+**4 nodes / 3 edges** — `home` (`startNode`), `about`, `contact`, `books`; edges
+`about—home`, `about—contact`, `about—books`. All four are file-backed. NOTE: the
+"13 nodes / 13 edges" list in the session 6 notes above is stale — that graph was
+replaced, not extended. `contact` currently points at `content/nodes/about-site.md`
+(possibly unintended). There is no `now` node yet, so `/now` falls back to `home`
+until one is added in the studio.
+
+### Session 7b — Card typography (lists, `h3`) + the `contact` content bug
+
+**1. Card lists were entirely unstyled.** `.node-card p` was the only rule
+carrying prose size/leading, so `li` inherited the card's default `1rem` and
+normal line-height — bigger *and* tighter than surrounding paragraphs. Lists now
+have their own type: `0.8rem` (a point under body prose, so a list reads as an
+aside), `line-height: 1.62`, `0.5rem` after every item *including the last* (a
+one-item bookshelf category still gets air before the next heading), and
+`padding-left: 1.2rem` to undo the global `* { padding: 0 }` reset.
+
+**2. List markers are CSS-drawn rings, not glyphs.** `ul > li::before` is a 5px
+hollow circle in `--edge-active` — deliberately the silhouette an undiscovered
+node wears, so a list reads as places you haven't been. Nested lists fill it in.
+**Do not swap this for a `•`/`◦`/`◆` character**: the self-hosted JetBrains Mono
+is a latin subset with no geometric shapes, so a glyph marker silently falls back
+to another face and renders inconsistently across browsers.
+
+**3. `h3` is now a real subheading.** Keeps the `h2`'s uppercase monospace
+treatment but drops to `--card-muted`, weight 400, no bottom rule, `0.78rem`,
+`0.1em` tracking. Cards with many sections also get `margin-top: 1.15rem` on any
+`h2`/`h3` that isn't `:first-child`.
+
+**4. Bullets had been invisible since session 7.** Making `.card-body` a scroll
+container computed `overflow-x` to `auto` as well, and with the reset stripping
+`ul`'s `padding-left` the markers sat at negative x — clipped, and unreachable by
+scrolling. Fixed by the indent in (1). Worth remembering whenever a scroll
+container is introduced.
+
+**5. `contact` rendered blank: bad content path in the graph, not a code bug.**
+The node pointed at `content/nodes/about-site.md`, which is a 0-byte stub, while
+its real 313-byte `contact.md` sat unused. Traced through the snapshots: correct
+in `graphs/first-draft.json`, wrong from `graphs/iteration-1.json` onward — a slip
+made in the studio that propagated into `graphs/mvp.json` and the deployed
+`graph.json`. Repointed in root `graph.json` and `graphs/mvp.json` (via a
+round-trip that verified `json.dumps(g, indent=2) + '\n'` reproduced the file
+byte-for-byte first, so the only diff is that one field — this is the format
+`studio/vite-fs-plugin.ts` writes). `iteration-1.json` left alone as history.
+
+**6. Empty content files no longer open a blank card.** `_loadContent` treats a
+whitespace-only fetch result as a stub and falls through to the new `_fallback()`
+(hint → em dash), the same path as `content: null`. A blank card looks like a
+bug; an em dash looks like a place that hasn't been written yet.
+
+### Session 7c — Studio opens centered on the graph
+
+`Canvas.tsx` initialised its view to `{ tx: 0, ty: 0, k: 1 }`, putting the world
+origin at the canvas's top-left. With the current graph that was badly wrong:
+authored coordinates run x `0…187` and y `−155…0`, so *every* node sat at or
+above the top edge and the graph was effectively off-screen on open.
+
+Now a one-shot `useEffect` centers on the **mass-weighted centroid** (`mass`
+defaults to 1, so it degenerates to the plain centroid — for the current graph
+the two differ by ~17px). It waits for the first non-empty node list (App starts
+from `emptyGraph()` and fetches asynchronously) and checks the SVG has been laid
+out before measuring.
+
+The `didCenter` ref is also set by `onWheel`, `bgPointerDown`, and
+`nodePointerDown` — **any interaction cancels the pending auto-center**. Without
+that, a genuinely empty root graph (or a failed load) would leave the centering
+armed, and placing the very first node would yank the view out from under it.
+Zoom is untouched at `k: 1`; there's no fit-to-extent, so a graph much larger
+than the viewport will still need a manual zoom out.
+
+### Session 7d — Current-node treatment: glow → presence halo
+
+**The old glow was accidentally black.** `.node-group.current .node-circle` used
+`drop-shadow(0 0 6px currentColor)`, but nothing ever set `color` on a node, so
+`currentColor` resolved to the document default — the "glow" was a dark blur
+smudging the warm paper, not a coloured halo.
+
+**Fix + redesign.** Two parts:
+
+1. `graph.js` now sets `style('color', d => _classColor(d))` on each
+   `.node-group` at render time, so `currentColor` inside a node resolves to that
+   node's resolved class colour. Useful beyond this one rule.
+2. The blur is gone in favour of a **drawn ring**: the previously inert
+   `.target-ring` circle (appended at `r + 5` for every node, never wired to
+   anything) was renamed `.node-halo` and lit by `.current` — a 1.25px hairline
+   in the node's own colour at 0.5 opacity, breathing `scale(1 → 1.14)` /
+   opacity `0.5 → 0.28` over 6.5s. Rationale: a soft glow is a backlit-screen
+   idiom and reads as grime on this palette; a concentric hairline is ink on a
+   map, and it shares the ring vocabulary already used by list markers and by
+   discovered-but-unvisited silhouettes. The pathfinding `.target` state still
+   blinks `.node-circle`, so nothing collided.
+
+Also deleted the unused `#glow` SVG filter from `defs` (defined in session 1,
+never referenced). Both of these were listed as orphans in `DESIGN.md`; that
+section now records them as resolved.
+
+**Postscript — the black-circles incident.** Renaming `.target-ring` →
+`.node-halo` across `style.css` *and* `graph.js` created a cache-skew bug: those
+two files cache independently, so a browser holding new CSS with a stale
+`graph.js` (still emitting `.target-ring`) had a circle matching no rule at all —
+SVG default `fill: black`, full opacity, radius `r + 5` — painting a black disc
+over every node. A hard reload fixed it, but the state shouldn't have been
+reachable, so it's now guarded from both directions:
+
+- `style.css` keeps `.target-ring` as an **alias** on the `.node-halo` base rule.
+  Don't delete it; it's what protects new-CSS-with-old-JS.
+- `graph.js` also sets `fill="none" stroke="none"` as *attributes* on the halo
+  circle, which protects old-CSS-with-new-JS. CSS still wins for the lit state,
+  since a rule beats a presentation attribute.
+
+**Lesson for future renames:** a class name shared between a JS file and a CSS
+file is a cross-file contract between two independently cached resources. Either
+keep an alias through the transition, or make the element safe by default in
+markup so that "no rule matched" degrades to invisible rather than to opaque
+black.
+
+**Verification note:** the site can be checked headlessly — Playwright's cached
+chromium lives at `~/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome`
+(pass it as `executablePath`; the `playwright` npm package must be ≥ the version
+matching that build, and node here is 18, so install `playwright@1.44` and point
+it at the newer binary). Serve the repo with `python3 -m http.server` first. This
+is how the halo, the computed circle fills, and the stale-class fallback were all
+confirmed rather than guessed at.

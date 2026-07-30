@@ -134,8 +134,22 @@ html, body {
   transition: filter 0.12s ease;
 }
 
-.node-group.current .node-circle {
-  filter: drop-shadow(0 0 6px currentColor);
+/* Where you are: a drawn ring, not a blur. A soft glow is a screen idiom —
+   backlit, atmospheric, and it muddies the warm paper it sits on. This is ink
+   on a map instead: a concentric hairline in the node's own class colour,
+   breathing very slowly so the spot you occupy is alive without being loud.
+   (The `color` property carrying `currentColor` here is set per-node in
+   graph.js from the resolved class colour.) */
+.node-group.current .node-halo {
+  opacity: 0.5;
+  stroke: currentColor;
+  stroke-width: 1.25px;
+  animation: halo-breathe 6.5s ease-in-out infinite alternate;
+}
+
+@keyframes halo-breathe {
+  from { transform: scale(1);    opacity: 0.5; }
+  to   { transform: scale(1.14); opacity: 0.28; }
 }
 
 /* ── traveler ── */
@@ -182,6 +196,57 @@ html, body {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Long bodies scroll inside the card rather than growing off-screen. The card
+   itself never scrolls, so the close button and the bottom fade stay fixed. */
+.card-body {
+  max-height: min(62vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--edge) transparent;
+}
+
+/* WebKit/Blink: a hairline in the same warm greys as the edges */
+.card-body::-webkit-scrollbar {
+  width: 7px;
+}
+.card-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.card-body::-webkit-scrollbar-thumb {
+  background: var(--edge);
+  border-radius: 4px;
+  /* inset the thumb so it reads as a mark on the page, not a UI gutter */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.card-body::-webkit-scrollbar-thumb:hover {
+  background: var(--edge-active);
+  background-clip: content-box;
+}
+
+/* Bottom fade — on while there's more to read, off once you reach the end.
+   Sits inside the card's radius and above the prose, below the close button. */
+.node-card::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  height: 3.25rem;
+  border-radius: 0 0 13px 13px;
+  background: linear-gradient(to bottom, rgba(245, 242, 236, 0), var(--card-bg) 78%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.node-card.overflowing::after {
+  opacity: 1;
+}
+
 .node-card h2 {
   font-size: 0.92rem;
   font-weight: 500;
@@ -205,6 +270,80 @@ html, body {
   margin-bottom: 0;
 }
 
+/* Lists. `p` was carrying the card's prose size and leading all by itself, so
+   list items fell back to the card's inherited 1rem and normal line-height —
+   visibly bigger and tighter than the paragraphs around them. These rules put
+   them on the same type as body prose. */
+.node-card ul,
+.node-card ol {
+  /* A point below body prose (0.88rem ≈ 14px → 0.8rem ≈ 12.8px): enough
+     contrast that a list reads as an aside to the paragraph above it. */
+  font-size: 0.8rem;
+  line-height: 1.62;
+  padding-left: 1.2rem;   /* the global `* { padding: 0 }` reset strips this */
+  margin-bottom: 0.7rem;
+}
+
+.node-card ul { list-style: none; }
+.node-card ol { list-style: decimal; }
+
+/* Air AFTER every item, the last one included, so a category holding a single
+   book still gets breathing room before the next heading. */
+.node-card li {
+  margin-bottom: 0.5rem;
+}
+
+/* The marker is a small hollow ring — the same silhouette an undiscovered node
+   wears out on the canvas, so a list reads as a handful of places you haven't
+   been yet. Drawn in CSS rather than set as a glyph on purpose: the self-hosted
+   JetBrains Mono is a latin subset with no geometric shapes in it, so a •/◦/◆
+   would silently fall back to some other font and render inconsistently.
+   Inline-block (not absolute) keeps wrapped lines aligned to the text edge. */
+.node-card ul > li::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--edge-active);
+  border-radius: 50%;
+  vertical-align: 0.22em;              /* sit on the x-height, not the baseline */
+  margin-left: -1.2rem;
+  margin-right: calc(1.2rem - 7px);    /* 5px box + 2px border = 7px outer */
+}
+
+/* Nested lists get a filled ring, the way a visited node fills in. */
+.node-card ul ul > li::before {
+  background: var(--edge-active);
+  border-color: var(--edge-active);
+}
+
+/* Loose lists (blank lines between items) wrap each item in a <p>; don't let
+   that paragraph's own bottom margin double up on the item's. */
+.node-card li > p:last-child {
+  margin-bottom: 0;
+}
+
+/* `###` is a subordinate label, not a second title: it keeps the h2's uppercase
+   monospace treatment (so it still reads as structure) but drops to the muted
+   grey, sheds the weight and the rule, and tracks a little tighter. Sits
+   clearly above body prose without competing with the card's own heading. */
+.node-card h3 {
+  font-family: var(--font-label);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+  margin: 0 0 0.5rem;
+}
+
+/* A card with many sections (bookshelf categories) needs its headings to sit
+   apart from the block above them. The card's own title is exempt. */
+.node-card h2:not(:first-child),
+.node-card h3:not(:first-child) {
+  margin-top: 1.15rem;
+}
+
 .node-card a {
   color: var(--node-core);
   text-decoration: none;
@@ -213,6 +352,13 @@ html, body {
 
 .node-card a:hover {
   opacity: 0.75;
+}
+
+/* A link to another node, not to the outside world. Dotted rather than solid:
+   it's a route, and following it costs travel time. */
+.node-card a.node-link {
+  border-bottom: 1px dotted rgba(74, 124, 140, 0.55);
+  cursor: pointer;
 }
 
 .node-card .card-close {
@@ -245,6 +391,11 @@ html, body {
   max-width: 200px;
 }
 
+/* Barren cards have no surface for a fade to fade into. */
+.node-card.sparse-card::after {
+  display: none;
+}
+
 /* ── travel overlay (blocks interaction during travel) ── */
 #travel-overlay {
   position: fixed;
@@ -258,17 +409,24 @@ html, body {
   cursor: wait;
 }
 
-/* ── target indicator (pulsing while pathfinding toward this node) ── */
+/* ── presence halo: base state. Lit only by `.current` (see above). ──
+   `.target-ring` is the element's former class name, kept here as an alias on
+   purpose: style.css and graph.js are separate cached files, so a visitor can
+   load new CSS against a cached graph.js that still emits the old name. With no
+   rule matching, that circle falls back to the SVG default `fill: black` at
+   r + 5 and paints a black disc over every node. Cheap insurance. */
+.node-halo,
 .target-ring {
   fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5px;
+  stroke: none;
   opacity: 0;
   pointer-events: none;
-  transform-box: fill-box;
+  transform-box: fill-box;   /* scale about the ring's centre, not the SVG origin */
   transform-origin: center;
+  transition: opacity 0.5s ease;
 }
 
+/* ── target indicator (blinks while pathfinding toward this node) ── */
 .node-group.target .node-circle {
   animation: target-blink 0.85s ease-in-out infinite alternate;
 }

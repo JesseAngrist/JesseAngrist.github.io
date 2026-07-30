@@ -35,6 +35,33 @@ export default function Canvas(p: Props) {
     };
   }
 
+  // Open centered on the graph's center of mass rather than with the world
+  // origin at the top-left corner. The graph arrives asynchronously (App starts
+  // from emptyGraph()), so this waits for the first non-empty node list and
+  // fires once — re-centering on later graph edits would fight the user's pan.
+  const didCenter = useRef(false);
+  useEffect(() => {
+    if (didCenter.current || !svgRef.current) return;
+    const nodes = p.graph.nodes;
+    if (!nodes.length) return;
+
+    const r = svgRef.current.getBoundingClientRect();
+    if (!r.width || !r.height) return;   // not laid out yet; retry next update
+
+    // Mass-weighted centroid. `mass` defaults to 1, so this reduces to the
+    // plain centroid when nothing carries an authored mass.
+    let total = 0, sx = 0, sy = 0;
+    for (const n of nodes) {
+      const m = n.mass ?? 1;
+      total += m; sx += n.x * m; sy += n.y * m;
+    }
+    if (!total) return;
+    const cx = sx / total, cy = sy / total;
+
+    didCenter.current = true;
+    setView((v) => ({ ...v, tx: r.width / 2 - cx * v.k, ty: r.height / 2 - cy * v.k }));
+  }, [p.graph.nodes]);
+
   // Center the view on a node when the linter requests focus.
   useEffect(() => {
     if (!p.focusNodeId || !svgRef.current) return;
@@ -48,6 +75,7 @@ export default function Canvas(p: Props) {
 
   function onWheel(e: React.WheelEvent) {
     e.preventDefault();
+    didCenter.current = true;   // any interaction cancels a pending auto-center
     const r = svgRef.current!.getBoundingClientRect();
     const mx = e.clientX - r.left, my = e.clientY - r.top;
     const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
@@ -64,6 +92,8 @@ export default function Canvas(p: Props) {
 
   function bgPointerDown(e: React.PointerEvent) {
     if (p.preview) return;
+    didCenter.current = true;   // as above — placing the first node on an empty
+                                // graph must not yank the view out from under it
     if (p.mode === 'addNode') {
       const w = toWorld(e.clientX, e.clientY);
       p.onAddNodeAt(Math.round(w.x), Math.round(w.y));
@@ -103,6 +133,7 @@ export default function Canvas(p: Props) {
   function nodePointerDown(e: React.PointerEvent, id: string) {
     e.stopPropagation();
     if (p.preview) return;
+    didCenter.current = true;   // as above
     if (p.mode === 'addEdge') {
       p.onEdgeClickNode(id);
       return;

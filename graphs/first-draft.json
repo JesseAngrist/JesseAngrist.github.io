@@ -41,7 +41,7 @@
       "class": "core",
       "x": 0,
       "y": 0,
-      "content": "content/nodes/home.html",
+      "content": "content/nodes/home.md",
       "r": 25,
       "hint": null,
       "mass": 2
@@ -52,7 +52,7 @@
       "class": "core",
       "x": 135,
       "y": 0,
-      "content": "content/nodes/contact.html",
+      "content": "content/nodes/contact.md",
       "r": 10,
       "hint": null,
       "mass": 1
@@ -63,7 +63,7 @@
       "class": "core",
       "x": 53,
       "y": -83,
-      "content": "content/nodes/about.html",
+      "content": "content/nodes/about.md",
       "r": 15,
       "hint": null,
       "mass": 1
@@ -140,7 +140,7 @@
       "class": "core",
       "x": -138,
       "y": 33,
-      "content": "content/nodes/work.html",
+      "content": "content/nodes/work.md",
       "r": 13,
       "hint": null,
       "mass": 1
@@ -151,7 +151,7 @@
       "class": "core",
       "x": 208,
       "y": -40,
-      "content": "content/nodes/substack.html",
+      "content": "content/nodes/substack.md",
       "r": 10,
       "hint": null,
       "mass": 1
@@ -162,7 +162,7 @@
       "class": "core",
       "x": 106,
       "y": -146,
-      "content": "content/nodes/about-site.html",
+      "content": "content/nodes/about-site.md",
       "r": 10,
       "hint": null,
       "mass": 1
@@ -173,7 +173,7 @@
       "class": "core",
       "x": -65,
       "y": -51,
-      "content": "content/nodes/coming-up.html",
+      "content": "content/nodes/coming-up.md",
       "r": 10,
       "hint": null,
       "mass": 1

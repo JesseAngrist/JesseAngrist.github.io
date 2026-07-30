@@ -10,7 +10,15 @@ const compassArrow = document.getElementById('compass-arrow');
 
 async function main() {
   const data = await fetch('graph.json').then(r => r.json());
-  const startId = data.config.startNode;
+
+  // Deep link: `#<node-id>` in the URL starts you AT that node rather than
+  // walking you there — the point of a shareable link is arrival, not a tour.
+  // `now/index.html` redirects into this, which is the whole /now mechanism.
+  // An unknown fragment falls back to the authored startNode, silently.
+  const hashId = decodeURIComponent(location.hash.slice(1));
+  const startId = data.nodes.some(n => n.id === hashId)
+    ? hashId
+    : data.config.startNode;
   const W = window.innerWidth;
   const H = window.innerHeight;
 
@@ -56,6 +64,46 @@ async function main() {
     if (cardOpenTimer) { clearTimeout(cardOpenTimer); cardOpenTimer = null; }
   }
 
+  // A trip can be scheduled to start after a reveal-bloom finishes; a new
+  // navigation supersedes it.
+  let tripTimer = null;
+  function cancelPendingTrip() {
+    if (tripTimer) { clearTimeout(tripTimer); tripTimer = null; }
+  }
+
+  // The one way anything travels: clicks, the compass, and in-card links all
+  // come through here. Prefers a route through the fog; if there isn't one yet
+  // (only in-card links can ask for that), reveals the real shortest route,
+  // lets it bloom in, then walks it.
+  function navigateTo(destination) {
+    if (travel.isTraveling() || !destination) return;
+    const current = travel.getCurrentNode();
+    if (destination === current) return;
+    if (!graph.getNodeData(destination)) return;   // unknown id → no-op
+
+    const known = discovery.findPath(current, destination);
+    if (known && known.length >= 2) {
+      content.close();
+      cancelPendingCard();
+      cancelPendingTrip();
+      travel.travelAlongPath(known);
+      return;
+    }
+
+    const route = discovery.findPathAny(current, destination);
+    if (!route || route.length < 2) return;        // disconnected → no-op
+
+    content.close();
+    cancelPendingCard();
+    cancelPendingTrip();
+    discovery.revealPath(route);
+    const wait = Math.max(0, graph.getBloomEndsAt() - performance.now()) + 250;
+    tripTimer = setTimeout(() => {
+      tripTimer = null;
+      travel.travelAlongPath(route);
+    }, wait);
+  }
+
   // Edge/node clicks → pathfind and travel
   graph.onEdgeClick((srcId, tgtId, event) => {
     if (travel.isTraveling()) return;
@@ -63,15 +111,11 @@ async function main() {
 
     let destination = tgtId;
     if (tgtId === current && srcId !== null) destination = srcId;
-    if (destination === current) return;
-
-    const path = discovery.findPath(current, destination);
-    if (!path || path.length < 2) return;
-
-    content.close();
-    cancelPendingCard();
-    travel.travelAlongPath(path);
+    navigateTo(destination);
   });
+
+  // In-card links (`[check out what i'm reading](#books)`) → travel there
+  content.onNodeLink(navigateTo);
 
   // Arrival → reveal neighbors (staggered bloom), then open the card 0.5s
   // after the final node has bloomed so it doesn't block the effect.
@@ -95,17 +139,7 @@ async function main() {
   graph.markCurrent(startId);
 
   // Compass: click navigates home
-  compass.addEventListener('click', () => {
-    if (travel.isTraveling()) return;
-    const current = travel.getCurrentNode();
-    if (current === startId) return;
-    const path = discovery.findPath(current, startId);
-    if (path && path.length >= 2) {
-      content.close();
-      cancelPendingCard();
-      travel.travelAlongPath(path);
-    }
-  });
+  compass.addEventListener('click', () => navigateTo(startId));
 
   window.addEventListener('resize', () => {
     graph.getSvg().attr('width', window.innerWidth).attr('height', window.innerHeight);
