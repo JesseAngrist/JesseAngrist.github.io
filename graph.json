@@ -47,70 +47,16 @@
       "mass": 2
     },
     {
-      "id": "about",
-      "label": "About Me",
-      "class": "core",
-      "x": 87,
-      "y": -75,
-      "content": "content/nodes/about.md",
-      "r": 18,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "contact",
-      "label": "Reach out!",
-      "class": "core",
-      "x": 171,
-      "y": -29,
-      "content": "content/nodes/contact.md",
-      "r": 10,
-      "hint": null,
-      "mass": 1
-    },
-    {
-      "id": "books",
-      "label": "Bookshelf",
-      "class": "content",
-      "x": 46,
-      "y": -155,
-      "content": "content/nodes/books.md",
-      "r": 15,
-      "hint": null,
-      "mass": 1
-    },
-    {
       "id": "now",
-      "label": "nownownow!",
+      "label": "What's up?",
       "class": "core",
-      "x": 182,
-      "y": -118,
-      "content": "content/nodes/now.md",
-      "r": 10,
+      "x": 114,
+      "y": 84,
+      "content": "I'm changing pretty fast at the moment, and it's hard to update this site with everything I'm thinking about right now. In general, [you should come talk to me](https://calendly.com/jesseangrist/talkin) about any of the following:\n- effective altruism, especially climate, air pollution, animal welfare, and GHD cause areas\n- AI safety, AI futurism, and AI consciousness/moral patienthood\n- Ethics, aesthetics, partiality, and love\n- Art and poetry(!)\n- Meditation, spirituality, and inner work\n\nYou can read my poetry, confessional writing, and effortposts (which can be hard to distinguish from one another) on my [Substack](https://substack.com/@jesseangrist), and you can catch me in person in Princeton, NJ (or, well, most places in the Northeast Corridor, time permitting). I'll also be at [EAGNYC, Oct. 16-18](https://www.effectivealtruism.org/ea-global/events/ea-global-new-york-city-2026) and [GCP Lite in Berkeley, Oct. 23-25!](https://www.globalchallengesproject.org/)\n",
+      "r": 18,
       "hint": null,
       "mass": 1
     }
   ],
-  "edges": [
-    {
-      "source": "about",
-      "target": "home",
-      "weight": 1
-    },
-    {
-      "source": "about",
-      "target": "contact",
-      "weight": 1
-    },
-    {
-      "source": "about",
-      "target": "books",
-      "weight": 1
-    },
-    {
-      "source": "now",
-      "target": "about",
-      "weight": 1
-    }
-  ]
+  "edges": []
 }
